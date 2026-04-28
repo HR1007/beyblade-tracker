@@ -29,6 +29,25 @@ const TRANSLATIONS = {
     net: 'NET',
     spinFinish: 'SPIN FINISH', overFinish: 'OVER FINISH',
     burstFinish: 'BURST FINISH', xtremeFinish: 'XTREME FINISH',
+    panelPerf: 'BATTLE PERFORMANCE',
+    panelGlossary: 'STAT GLOSSARY',
+    perfLabel: 'NET/BTL RATING',
+    perfDominantTitle: 'DOMINANT',
+    perfDominantDesc: 'This combo has overwhelming control. It is your primary point scorer — keep it in your main rotation.',
+    perfBalancedTitle: 'TRADE WAR',
+    perfBalancedDesc: 'Win/loss rates and point gains are in equilibrium. Solid but not decisive — consider adjusting the Bit or Ratchet for an edge.',
+    perfLosingTitle: 'LOSING GROUND',
+    perfLosingDesc: 'This combo is bleeding points under its current setup. Try swapping the Ratchet or Bit to improve performance.',
+    glossaryItems: [
+      { term: 'WIN RATE',     formula: 'Wins ÷ Total Battles × 100%',        desc: 'The percentage of battles this combo has won.' },
+      { term: 'AVG WIN PT',   formula: 'Points Gained in Wins ÷ Wins',        desc: 'Average points earned per victory. Higher = more decisive wins.' },
+      { term: 'NET POINTS',   formula: 'Total Gained − Total Lost',            desc: 'Overall point balance across all battles.' },
+      { term: 'NET PT/BTL',   formula: 'Net Points ÷ Total Battles',           desc: 'Average net points per battle. The key performance index.' },
+      { term: 'SPIN FINISH',  formula: '1 PT',                                 desc: 'Opponent\'s Beyblade stops spinning inside the stadium.' },
+      { term: 'OVER FINISH',  formula: '2 PT',                                 desc: 'Opponent\'s Beyblade is knocked out of the stadium.' },
+      { term: 'BURST FINISH', formula: '2 PT',                                 desc: 'Opponent\'s Beyblade bursts apart during battle.' },
+      { term: 'XTREME FINISH',formula: '3 PT',                                 desc: 'Opponent\'s Beyblade hits the Xtreme Line and exits.' },
+    ],
     help: [
       { icon: '🎮', title: 'ADD A COMBO',    desc: 'Tap [ + NEW ] to register your combo. Enter the Blade, Ratchet, and Bit parts.' },
       { icon: '⚔️', title: 'RECORD BATTLES', desc: 'Go to BATTLE tab. After each match, tap WIN or LOSS under the finish type.' },
@@ -67,6 +86,25 @@ const TRANSLATIONS = {
     net: '淨分',
     spinFinish: '停轉完成', overFinish: '飛出完成',
     burstFinish: '爆裂完成', xtremeFinish: '極限完成',
+    panelPerf: '戰鬥表現評價',
+    panelGlossary: '數據名詞解釋',
+    perfLabel: '每場淨得分評級',
+    perfDominantTitle: '強力壓制',
+    perfDominantDesc: '該陀螺具有強大的壓制力，是您的主力得分手。建議在重要對局中優先使用此組合。',
+    perfBalancedTitle: '貿易戰',
+    perfBalancedDesc: '勝負機率與分數獲取處於平衡，此陀螺表現中規中矩，沒有絕對的勝率優勢，但也不至於被完全克制。',
+    perfLosingTitle: '賠分警示',
+    perfLosingDesc: '該陀螺在目前戰術體系中持續「賠分」，建議調整零件搭配（例如更換 Ratchet 或 Bit）以提升整體表現。',
+    glossaryItems: [
+      { term: '勝率',       formula: '勝場 ÷ 總場數 × 100%',          desc: '此組合在所有對戰中獲勝的百分比。' },
+      { term: '平均勝分',   formula: '勝利總得分 ÷ 勝場數',            desc: '每次勝利平均獲得的點數，數字越高代表勝利越具決定性。' },
+      { term: '淨得分',     formula: '總獲得分 − 總失去分',            desc: '所有對戰的點數總結算，正數表示整體獲利。' },
+      { term: '每場淨分',   formula: '淨得分 ÷ 總場數',                desc: '每場對戰平均淨得幾分，是衡量此陀螺實力的核心指標。' },
+      { term: '停轉完成',   formula: '1 分',                           desc: '對手陀螺在場內停止旋轉。' },
+      { term: '飛出完成',   formula: '2 分',                           desc: '對手陀螺被擊飛出場地。' },
+      { term: '爆裂完成',   formula: '2 分',                           desc: '對手陀螺在對戰中爆裂分解。' },
+      { term: '極限完成',   formula: '3 分',                           desc: '對手陀螺碰觸極限線後飛出場地，得分最高。' },
+    ],
     help: [
       { icon: '🎮', title: '新增組合', desc: '點擊 [ + 新增 ] 登錄你的陀螺組合，輸入刀刃、棘輪、尖端零件名稱。' },
       { icon: '⚔️', title: '記錄對戰', desc: '切換到「對戰」頁籤，每場結束後點擊對應完成方式的「勝」或「敗」。' },
@@ -117,6 +155,12 @@ function calcStats(stats) {
   const netPoints = totalGained - totalLost;
   const avgNetPerBattle = totalBattles > 0 ? (netPoints / totalBattles) : 0;
   return { totalWins, totalLosses, totalBattles, totalGained, totalLost, winRate, avgWinScore, netPoints, avgNetPerBattle };
+}
+
+function getPerformanceTier(avgNetPerBattle) {
+  if (avgNetPerBattle >= 0.8)  return { tier: 'dominant', color: '#00FF64', bar: '#00FF64', icon: '🔥' };
+  if (avgNetPerBattle >= -0.3) return { tier: 'balanced', color: '#FFB340', bar: '#FFB340', icon: '⚖️' };
+  return                               { tier: 'losing',   color: '#FF5C7A', bar: '#FF5C7A', icon: '📉' };
 }
 
 // ── HUD Panel ─────────────────────────────────────────────────
@@ -575,6 +619,65 @@ export default function App() {
               </div>
             </div>
           )}
+        </HudPanel>
+
+        {/* ── Performance Rating ── */}
+        {activeStats.totalBattles > 0 && (() => {
+          const perf = getPerformanceTier(activeStats.avgNetPerBattle);
+          const titleKey = perf.tier === 'dominant' ? 'perfDominantTitle' : perf.tier === 'balanced' ? 'perfBalancedTitle' : 'perfLosingTitle';
+          const descKey  = perf.tier === 'dominant' ? 'perfDominantDesc'  : perf.tier === 'balanced' ? 'perfBalancedDesc'  : 'perfLosingDesc';
+          // bar width: map roughly -3..+3 → 0..100%
+          const barPct = Math.min(100, Math.max(0, ((activeStats.avgNetPerBattle + 3) / 6) * 100));
+          return (
+            <HudPanel color={perf.color} title={t.panelPerf} style={{ marginBottom:14 }}>
+              {/* Rating header */}
+              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14 }}>
+                <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                  <span style={{ fontSize:28 }}>{perf.icon}</span>
+                  <div>
+                    <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:10, color:perf.color, textShadow:`0 0 10px ${perf.color}`, letterSpacing:0.5 }}>{t[titleKey]}</div>
+                    <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:6, color:'rgba(255,255,255,0.35)', marginTop:6 }}>{t.perfLabel}</div>
+                  </div>
+                </div>
+                <div style={{ textAlign:'right' }}>
+                  <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:18, color:perf.color, textShadow:`0 0 12px ${perf.color}` }}>
+                    {activeStats.avgNetPerBattle >= 0 ? '+' : ''}{activeStats.avgNetPerBattle.toFixed(2)}
+                  </div>
+                  <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:6, color:'rgba(255,255,255,0.3)', marginTop:4 }}>NET/BTL</div>
+                </div>
+              </div>
+              {/* Spectrum bar */}
+              <div style={{ marginBottom:14 }}>
+                <div style={{ height:6, background:'rgba(255,255,255,0.06)', borderRadius:3, overflow:'hidden', position:'relative' }}>
+                  <div style={{ position:'absolute', left:'50%', top:0, bottom:0, width:1, background:'rgba(255,255,255,0.2)' }} />
+                  <div style={{ height:'100%', width:`${barPct}%`, background:`linear-gradient(90deg, #FF5C7A, #FFB340, #00FF64)`, borderRadius:3, transition:'width 0.6s ease' }} />
+                </div>
+                <div style={{ display:'flex', justifyContent:'space-between', marginTop:5, fontFamily:"'Press Start 2P', monospace", fontSize:5, color:'rgba(255,255,255,0.25)' }}>
+                  <span>−</span><span>0</span><span>+</span>
+                </div>
+              </div>
+              {/* Description */}
+              <div style={{ padding:'10px 12px', background:`${perf.color}08`, border:`1px solid ${perf.color}22`, borderRadius:4 }}>
+                <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:7, color:'rgba(255,255,255,0.55)', lineHeight:2.2 }}>{t[descKey]}</div>
+              </div>
+            </HudPanel>
+          );
+        })()}
+
+        {/* ── Glossary ── */}
+        <HudPanel color="#C97FFF" title={t.panelGlossary} style={{ marginBottom:14 }}>
+          {t.glossaryItems.map((item, i) => (
+            <div key={i} style={{ marginBottom: i < t.glossaryItems.length - 1 ? 10 : 0,
+              padding:'10px 12px', background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.05)', borderRadius:4 }}>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
+                <span style={{ fontFamily:"'Press Start 2P', monospace", fontSize:7, color:'#C97FFF' }}>{item.term}</span>
+                <span style={{ fontFamily:"'Press Start 2P', monospace", fontSize:6, color:'rgba(255,255,255,0.25)',
+                  background:'rgba(201,127,255,0.08)', border:'1px solid rgba(201,127,255,0.2)',
+                  padding:'2px 7px', borderRadius:3 }}>{item.formula}</span>
+              </div>
+              <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:6, color:'rgba(255,255,255,0.4)', lineHeight:2 }}>{item.desc}</div>
+            </div>
+          ))}
         </HudPanel>
       </div>
     );
