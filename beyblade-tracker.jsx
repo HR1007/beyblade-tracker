@@ -21,6 +21,9 @@ const TRANSLATIONS = {
     placeholderName: 'e.g. Dran Sword 3-60F', placeholderBlade: 'e.g. Dran Sword',
     placeholderRatchet: 'e.g. 3-60', placeholderBit: 'e.g. Flat',
     btnCancel: 'CANCEL', btnCreate: 'CREATE ⚡',
+    deleteTitle: 'DELETE COMBO?',
+    deleteMsg: 'All battle records for this combo will be permanently lost.',
+    btnDeleteConfirm: '🗑 DELETE', btnDeleteCancel: 'KEEP IT',
     notifWin: 'WIN!', notifLoss: 'LOSS', notifUndo: 'UNDONE',
     helpPrev: '◀ PREV', helpNext: 'NEXT ▶', helpStart: 'START ⚡',
     net: 'NET',
@@ -56,6 +59,9 @@ const TRANSLATIONS = {
     placeholderName: '例：Dran Sword 3-60F', placeholderBlade: '例：Dran Sword',
     placeholderRatchet: '例：3-60', placeholderBit: '例：Flat',
     btnCancel: '取消', btnCreate: '建立 ⚡',
+    deleteTitle: '確定刪除組合？',
+    deleteMsg: '這個組合的所有對戰紀錄將永久消失。',
+    btnDeleteConfirm: '🗑 刪除', btnDeleteCancel: '保留',
     notifWin: '勝利！', notifLoss: '落敗', notifUndo: '已撤銷',
     helpPrev: '◀ 上一頁', helpNext: '下一頁 ▶', helpStart: '開始 ⚡',
     net: '淨分',
@@ -357,6 +363,7 @@ export default function App() {
   const [tab, setTab] = useState('combos');
   const [notification, setNotification] = useState(null);
   const [showHelp, setShowHelp] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(null); // index to delete, or null
   const [lang, setLang] = useState(() => localStorage.getItem('bey-lang') || 'en');
   const notifTimer = useRef(null);
 
@@ -441,7 +448,7 @@ export default function App() {
             {combos.map((c,i) => (
               <ComboCard key={c.id} combo={c} isActive={i === activeIdx}
                 onSelect={() => { setActiveIdx(i); setTab('battle'); }}
-                onDelete={() => deleteCombo(i)} />
+                onDelete={() => setConfirmDelete(i)} />
             ))}
           </div>
         )}
@@ -650,6 +657,49 @@ export default function App() {
 
         <TabBar tab={tab} setTab={setTab} hasCombos={combos.length > 0} />
         {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
+
+        {/* ═══ DELETE CONFIRM MODAL ═══ */}
+        {confirmDelete !== null && (
+          <div style={{ position:'fixed', inset:0, zIndex:600, display:'flex', alignItems:'flex-end', justifyContent:'center' }}>
+            <div onClick={() => setConfirmDelete(null)} style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.85)', backdropFilter:'blur(8px)', WebkitBackdropFilter:'blur(8px)' }} />
+            <div style={{ position:'relative', zIndex:1, width:'100%', maxWidth:480,
+              background:'#07070c', borderRadius:'12px 12px 0 0',
+              border:'1px solid rgba(255,92,122,0.25)', borderBottom:'none',
+              padding:'28px 20px 40px', boxShadow:'0 -8px 40px rgba(255,92,122,0.12)' }}>
+              <div style={{ width:36, height:4, background:'rgba(255,255,255,0.15)', borderRadius:2, margin:'0 auto 24px' }} />
+              <div style={{ textAlign:'center', marginBottom:20 }}>
+                <div style={{ fontSize:36, marginBottom:14 }}>⚠️</div>
+                <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:9, color:'#FF5C7A',
+                  textShadow:'0 0 8px #FF5C7A', marginBottom:14, letterSpacing:1 }}>{t.deleteTitle}</div>
+                <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:7,
+                  color:'rgba(255,255,255,0.4)', lineHeight:2, maxWidth:300, margin:'0 auto' }}>
+                  {combos[confirmDelete]?.name && (
+                    <span style={{ color:'#38D9F5', display:'block', marginBottom:10 }}>
+                      [{combos[confirmDelete].name}]
+                    </span>
+                  )}
+                  {t.deleteMsg}
+                </div>
+              </div>
+              <div style={{ display:'flex', gap:10, marginTop:24 }}>
+                <button onClick={() => setConfirmDelete(null)} style={{
+                  flex:2, padding:'14px', borderRadius:4,
+                  border:'1px solid rgba(56,217,245,0.25)', background:'rgba(56,217,245,0.06)',
+                  color:'#38D9F5', fontFamily:"'Press Start 2P', monospace", fontSize:8,
+                  cursor:'pointer', WebkitTapHighlightColor:'transparent',
+                }}>{t.btnDeleteCancel}</button>
+                <button onClick={() => { deleteCombo(confirmDelete); setConfirmDelete(null); }} style={{
+                  flex:1, padding:'14px', borderRadius:4,
+                  border:'1px solid rgba(255,92,122,0.35)',
+                  background:'rgba(255,92,122,0.15)', color:'#FF5C7A',
+                  fontFamily:"'Press Start 2P', monospace", fontSize:8,
+                  cursor:'pointer', WebkitTapHighlightColor:'transparent',
+                  boxShadow:'0 0 12px rgba(255,92,122,0.2)',
+                }}>{t.btnDeleteConfirm}</button>
+              </div>
+            </div>
+          </div>
+        )}}
 
         {/* Add Combo Modal */}
         {showAdd && (
