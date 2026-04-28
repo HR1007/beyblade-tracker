@@ -12,10 +12,10 @@ const HELP_STEPS = [
 ];
 
 const FINISH_TYPES = [
-  { key: 'spin',   label: 'SPIN FINISH',   points: 1, color: '#00F5FF', glow: '#00F5FF', icon: '🌀', desc: '1 PT' },
-  { key: 'over',   label: 'OVER FINISH',   points: 2, color: '#FF9500', glow: '#FF9500', icon: '💥', desc: '2 PT' },
-  { key: 'burst',  label: 'BURST FINISH',  points: 2, color: '#FF3B5C', glow: '#FF3B5C', icon: '💢', desc: '2 PT' },
-  { key: 'xtreme', label: 'XTREME FINISH', points: 3, color: '#BF5FFF', glow: '#BF5FFF', icon: '⚡', desc: '3 PT' },
+  { key: 'spin',   label: 'SPIN FINISH',   points: 1, color: '#38D9F5', glow: '#38D9F5', icon: '🌀', desc: '1 PT' },
+  { key: 'over',   label: 'OVER FINISH',   points: 2, color: '#FFB340', glow: '#FFB340', icon: '💥', desc: '2 PT' },
+  { key: 'burst',  label: 'BURST FINISH',  points: 2, color: '#FF5C7A', glow: '#FF5C7A', icon: '💢', desc: '2 PT' },
+  { key: 'xtreme', label: 'XTREME FINISH', points: 3, color: '#C97FFF', glow: '#C97FFF', icon: '⚡', desc: '3 PT' },
 ];
 
 const DEFAULT_STATS = () => ({
@@ -53,7 +53,7 @@ function calcStats(stats) {
 }
 
 // ── HUD corner bracket decoration ──
-function HudPanel({ children, color = '#00F5FF', style = {}, title }) {
+function HudPanel({ children, color = '#38D9F5', style = {}, title }) {
   const c = color;
   const dim = 14;
   const thick = 2;
@@ -98,7 +98,7 @@ function HudPanel({ children, color = '#00F5FF', style = {}, title }) {
 }
 
 // ── Arcade stat chip ──
-function StatChip({ label, value, color = '#00F5FF', unit = '' }) {
+function StatChip({ label, value, color = '#38D9F5', unit = '' }) {
   return (
     <div style={{
       display: 'flex', flexDirection: 'column', alignItems: 'center',
@@ -194,20 +194,20 @@ function FinishRow({ finishType: ft, stat, onRecord }) {
 function ComboCard({ combo, isActive, onSelect, onDelete }) {
   const stats = calcStats(combo.stats);
   const winPct = stats.winRate.toFixed(0);
-  const col = isActive ? '#00F5FF' : 'rgba(255,255,255,0.15)';
+  const col = isActive ? '#38D9F5' : 'rgba(255,255,255,0.15)';
   return (
     <div onClick={onSelect} style={{
       padding: '14px 12px',
-      background: isActive ? 'rgba(0,245,255,0.06)' : 'rgba(255,255,255,0.02)',
-      border: `1px solid ${isActive ? '#00F5FF44' : 'rgba(255,255,255,0.06)'}`,
+      background: isActive ? 'rgba(56,217,245,0.06)' : 'rgba(255,255,255,0.02)',
+      border: `1px solid ${isActive ? '#38D9F544' : 'rgba(255,255,255,0.06)'}`,
       borderRadius: 4, cursor: 'pointer',
-      boxShadow: isActive ? '0 0 16px #00F5FF18' : 'none',
+      boxShadow: isActive ? '0 0 16px #38D9F518' : 'none',
       transition: 'all 0.2s', position: 'relative',
       WebkitTapHighlightColor: 'transparent',
     }}>
-      {isActive && <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: '#00F5FF', boxShadow: '0 0 8px #00F5FF', borderRadius: '4px 0 0 4px' }} />}
+      {isActive && <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: '#38D9F5', boxShadow: '0 0 8px #38D9F5', borderRadius: '4px 0 0 4px' }} />}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8, paddingLeft: isActive ? 8 : 0 }}>
-        <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 8, color: col, textShadow: isActive ? '0 0 6px #00F5FF' : 'none', letterSpacing: 0.5, lineHeight: 1.5, flex: 1, paddingRight: 8 }}>
+        <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 8, color: col, textShadow: isActive ? '0 0 6px #38D9F5' : 'none', letterSpacing: 0.5, lineHeight: 1.5, flex: 1, paddingRight: 8 }}>
           {combo.name || 'UNNAMED'}
         </div>
         <button onClick={e => { e.stopPropagation(); onDelete(); }} style={{
@@ -219,7 +219,7 @@ function ComboCard({ combo, isActive, onSelect, onDelete }) {
       <div style={{ display: 'flex', gap: 12, fontFamily: "'Press Start 2P', monospace", fontSize: 6, paddingLeft: isActive ? 8 : 0 }}>
         <span style={{ color: '#00FF64' }}>{winPct}% WIN</span>
         <span style={{ color: 'rgba(255,255,255,0.3)' }}>{stats.totalBattles} BTLS</span>
-        <span style={{ color: '#00F5FF' }}>{stats.avgWinScore.toFixed(1)} AVG</span>
+        <span style={{ color: '#38D9F5' }}>{stats.avgWinScore.toFixed(1)} AVG</span>
       </div>
     </div>
   );
@@ -236,9 +236,9 @@ function HelpModal({ onClose }) {
       <div style={{
         position: 'relative', zIndex: 1, width: '100%', maxWidth: 480,
         background: '#07070c', borderRadius: '12px 12px 0 0',
-        border: '1px solid rgba(0,245,255,0.2)', borderBottom: 'none',
+        border: '1px solid rgba(56,217,245,0.2)', borderBottom: 'none',
         padding: '28px 20px 40px',
-        boxShadow: '0 -8px 40px rgba(0,245,255,0.12)',
+        boxShadow: '0 -8px 40px rgba(56,217,245,0.12)',
       }}>
         <div style={{ width: 36, height: 4, background: 'rgba(255,255,255,0.15)', borderRadius: 2, margin: '0 auto 24px' }} />
 
@@ -247,8 +247,8 @@ function HelpModal({ onClose }) {
           {HELP_STEPS.map((_, i) => (
             <div key={i} onClick={() => setStep(i)} style={{
               width: i === step ? 20 : 6, height: 6, borderRadius: 3,
-              background: i === step ? '#00F5FF' : 'rgba(255,255,255,0.15)',
-              boxShadow: i === step ? '0 0 6px #00F5FF' : 'none',
+              background: i === step ? '#38D9F5' : 'rgba(255,255,255,0.15)',
+              boxShadow: i === step ? '0 0 6px #38D9F5' : 'none',
               transition: 'all 0.3s', cursor: 'pointer',
             }} />
           ))}
@@ -257,7 +257,7 @@ function HelpModal({ onClose }) {
         {/* Content */}
         <div style={{ textAlign: 'center', minHeight: 140, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 8px' }}>
           <div style={{ fontSize: 40, marginBottom: 16 }}>{s.icon}</div>
-          <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 9, color: '#00F5FF', textShadow: '0 0 8px #00F5FF', marginBottom: 16, letterSpacing: 1 }}>{s.title}</div>
+          <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 9, color: '#38D9F5', textShadow: '0 0 8px #38D9F5', marginBottom: 16, letterSpacing: 1 }}>{s.title}</div>
           <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 7, color: 'rgba(255,255,255,0.5)', lineHeight: 2, maxWidth: 320 }}>{s.desc}</div>
         </div>
 
@@ -273,14 +273,14 @@ function HelpModal({ onClose }) {
           {step < total - 1 ? (
             <button onClick={() => setStep(p => p + 1)} style={{
               flex: 2, padding: '13px', borderRadius: 4, border: 'none',
-              background: 'linear-gradient(135deg, #00F5FF, #BF5FFF)', color: '#000',
+              background: 'linear-gradient(135deg, #38D9F5, #C97FFF)', color: '#000',
               fontFamily: "'Press Start 2P', monospace", fontSize: 8, cursor: 'pointer',
               WebkitTapHighlightColor: 'transparent',
             }}>NEXT ▶</button>
           ) : (
             <button onClick={onClose} style={{
               flex: 2, padding: '13px', borderRadius: 4, border: 'none',
-              background: 'linear-gradient(135deg, #00FF64, #00F5FF)', color: '#000',
+              background: 'linear-gradient(135deg, #00FF64, #38D9F5)', color: '#000',
               fontFamily: "'Press Start 2P', monospace", fontSize: 8, cursor: 'pointer',
               WebkitTapHighlightColor: 'transparent',
             }}>START ⚡</button>
@@ -301,9 +301,9 @@ function TabBar({ tab, setTab, hasCombos }) {
   return (
     <nav style={{
       position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 200,
-      display: 'flex', borderTop: '1px solid rgba(0,245,255,0.15)',
-      background: 'rgba(5,5,8,0.95)', backdropFilter: 'blur(20px)',
-      WebkitBackdropFilter: 'blur(20px)',
+      display: 'flex', borderTop: '1px solid rgba(56,217,245,0.18)',
+      background: 'rgba(8,8,20,0.97)', backdropFilter: 'blur(24px)',
+      WebkitBackdropFilter: 'blur(24px)',
     }}>
       {tabs.map(t => {
         const active = tab === t.key;
@@ -318,10 +318,10 @@ function TabBar({ tab, setTab, hasCombos }) {
             <span style={{ fontSize: 18 }}>{t.icon}</span>
             <span style={{
               fontFamily: "'Press Start 2P', monospace", fontSize: 6,
-              color: active ? '#00F5FF' : 'rgba(255,255,255,0.35)',
-              textShadow: active ? '0 0 8px #00F5FF' : 'none',
+              color: active ? '#38D9F5' : 'rgba(180,220,255,0.35)',
+              textShadow: active ? '0 0 8px #38D9F5' : 'none',
             }}>{t.label}</span>
-            {active && <div style={{ width: 24, height: 2, background: '#00F5FF', boxShadow: '0 0 6px #00F5FF', borderRadius: 1 }} />}
+            {active && <div style={{ width: 24, height: 2, background: '#38D9F5', boxShadow: '0 0 6px #38D9F5', borderRadius: 1 }} />}
           </button>
         );
       })}
@@ -408,7 +408,7 @@ export default function App() {
 
   const renderCombosPanel = () => (
     <div style={{ padding: '16px 14px' }}>
-      <HudPanel color="#00F5FF" title="COMBO ROSTER" style={{ marginBottom: 14 }}>
+      <HudPanel color="#38D9F5" title="COMBO ROSTER" style={{ marginBottom: 14 }}>
         {combos.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '32px 0' }}>
             <div style={{ fontSize: 48, marginBottom: 16 }}>⚡</div>
@@ -428,19 +428,19 @@ export default function App() {
       </HudPanel>
 
       {combos.length > 0 && (
-        <HudPanel color="#BF5FFF" title="GLOBAL STATS" style={{ marginBottom: 14 }}>
+        <HudPanel color="#C97FFF" title="GLOBAL STATS" style={{ marginBottom: 14 }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, padding: '4px 0' }}>
             <StatChip label="WIN RATE" value={globalStats.winRate} unit="%" color="#00FF64" />
             <StatChip label="BATTLES" value={globalStats.totalBattles} color="#FF9500" />
-            <StatChip label="AVG WIN PT" value={globalStats.avgWinScore} color="#00F5FF" />
-            <StatChip label="NET PT/BTL" value={globalStats.avgNetPerBattle} color="#BF5FFF" />
+            <StatChip label="AVG WIN PT" value={globalStats.avgWinScore} color="#38D9F5" />
+            <StatChip label="NET PT/BTL" value={globalStats.avgNetPerBattle} color="#C97FFF" />
           </div>
           <div style={{ display: 'flex', justifyContent: 'center', gap: 20, marginTop: 14, fontFamily: "'Press Start 2P', monospace", fontSize: 7 }}>
             <span style={{ color: '#00FF64' }}>+{globalStats.totalGained}</span>
             <span style={{ color: 'rgba(255,255,255,0.3)' }}>|</span>
             <span style={{ color: '#FF3C50' }}>-{globalStats.totalLost}</span>
             <span style={{ color: 'rgba(255,255,255,0.3)' }}>|</span>
-            <span style={{ color: globalStats.netPoints >= 0 ? '#00F5FF' : '#FF3C50' }}>
+            <span style={{ color: globalStats.netPoints >= 0 ? '#38D9F5' : '#FF3C50' }}>
               NET {globalStats.netPoints >= 0 ? '+' : ''}{globalStats.netPoints}
             </span>
           </div>
@@ -458,20 +458,20 @@ export default function App() {
     return (
       <div style={{ padding: '16px 14px' }}>
         {/* Combo header */}
-        <HudPanel color="#00F5FF" style={{ marginBottom: 14 }}>
-          <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 10, color: '#00F5FF', textShadow: '0 0 8px #00F5FF', marginBottom: 10, lineHeight: 1.6 }}>
+        <HudPanel color="#38D9F5" style={{ marginBottom: 14 }}>
+          <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 10, color: '#38D9F5', textShadow: '0 0 8px #38D9F5', marginBottom: 10, lineHeight: 1.6 }}>
             {activeCombo.name}
           </div>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14 }}>
-            {activeCombo.blade   && <span style={{ fontFamily:"'Press Start 2P',monospace", fontSize:6, padding:'4px 8px', background:'rgba(0,245,255,0.08)', border:'1px solid #00F5FF33', color:'#00F5FF', borderRadius:2 }}>{activeCombo.blade}</span>}
+            {activeCombo.blade   && <span style={{ fontFamily:"'Press Start 2P',monospace", fontSize:6, padding:'4px 8px', background:'rgba(56,217,245,0.08)', border:'1px solid #38D9F533', color:'#38D9F5', borderRadius:2 }}>{activeCombo.blade}</span>}
             {activeCombo.ratchet && <span style={{ fontFamily:"'Press Start 2P',monospace", fontSize:6, padding:'4px 8px', background:'rgba(255,149,0,0.08)',  border:'1px solid #FF950033',  color:'#FF9500', borderRadius:2 }}>{activeCombo.ratchet}</span>}
-            {activeCombo.bit     && <span style={{ fontFamily:"'Press Start 2P',monospace", fontSize:6, padding:'4px 8px', background:'rgba(191,95,255,0.08)', border:'1px solid #BF5FFF33', color:'#BF5FFF', borderRadius:2 }}>{activeCombo.bit}</span>}
+            {activeCombo.bit     && <span style={{ fontFamily:"'Press Start 2P',monospace", fontSize:6, padding:'4px 8px', background:'rgba(201,127,255,0.08)', border:'1px solid #C97FFF33', color:'#C97FFF', borderRadius:2 }}>{activeCombo.bit}</span>}
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 8 }}>
             <StatChip label="WIN%" value={activeStats.winRate} unit="%" color="#00FF64" />
             <StatChip label="WINS" value={activeStats.totalWins} color="#00FF64" />
             <StatChip label="LOSS" value={activeStats.totalLosses} color="#FF3C50" />
-            <StatChip label="AVG PT" value={activeStats.avgWinScore} color="#00F5FF" />
+            <StatChip label="AVG PT" value={activeStats.avgWinScore} color="#38D9F5" />
           </div>
         </HudPanel>
 
@@ -499,7 +499,7 @@ export default function App() {
     if (!activeCombo) return null;
     return (
       <div style={{ padding: '16px 14px' }}>
-        <HudPanel color="#BF5FFF" title="SCORE BREAKDOWN" style={{ marginBottom: 14 }}>
+        <HudPanel color="#C97FFF" title="SCORE BREAKDOWN" style={{ marginBottom: 14 }}>
           {FINISH_TYPES.map(ft => {
             const s = activeCombo.stats[ft.key];
             const gained = s.wins * ft.points;
@@ -556,12 +556,12 @@ export default function App() {
 
           {/* Formulas */}
           {activeStats.totalBattles > 0 && (
-            <div style={{ padding: '10px 12px', background: 'rgba(0,245,255,0.04)', border: '1px solid rgba(0,245,255,0.1)', borderRadius: 4 }}>
-              <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 6, color: '#00F5FF', marginBottom: 8 }}>FORMULAS</div>
+            <div style={{ padding: '10px 12px', background: 'rgba(56,217,245,0.04)', border: '1px solid rgba(56,217,245,0.1)', borderRadius: 4 }}>
+              <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 6, color: '#38D9F5', marginBottom: 8 }}>FORMULAS</div>
               <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 6, color: 'rgba(255,255,255,0.4)', lineHeight: 2.2 }}>
-                AVG WIN = {activeStats.totalGained}/{activeStats.totalWins} = <span style={{ color: '#00F5FF' }}>{activeStats.avgWinScore.toFixed(3)}</span>
+                AVG WIN = {activeStats.totalGained}/{activeStats.totalWins} = <span style={{ color: '#38D9F5' }}>{activeStats.avgWinScore.toFixed(3)}</span>
                 <br />
-                NET/BTL = {activeStats.netPoints}/{activeStats.totalBattles} = <span style={{ color: '#BF5FFF' }}>{activeStats.avgNetPerBattle.toFixed(3)}</span>
+                NET/BTL = {activeStats.netPoints}/{activeStats.totalBattles} = <span style={{ color: '#C97FFF' }}>{activeStats.avgNetPerBattle.toFixed(3)}</span>
               </div>
             </div>
           )}
@@ -573,9 +573,9 @@ export default function App() {
   return (
     <div style={{
       minHeight: '100vh', width: '100%',
-      background: '#050508',
-      backgroundImage: 'radial-gradient(ellipse at 20% 10%, rgba(0,245,255,0.04) 0%, transparent 50%), radial-gradient(ellipse at 80% 90%, rgba(191,95,255,0.04) 0%, transparent 50%)',
-      color: '#F1F5F9',
+      background: '#080814',
+      backgroundImage: 'radial-gradient(ellipse at 20% 10%, rgba(56,217,245,0.07) 0%, transparent 55%), radial-gradient(ellipse at 80% 90%, rgba(201,127,255,0.07) 0%, transparent 55%), radial-gradient(ellipse at 50% 50%, rgba(30,30,80,0.5) 0%, transparent 70%)',
+      color: '#E8F4FF',
       paddingBottom: 72,
       overflowX: 'hidden',
     }}>
@@ -601,38 +601,49 @@ export default function App() {
 
       {/* ═══ HEADER ═══ */}
       <header style={{
-        padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        borderBottom: '1px solid rgba(0,245,255,0.1)',
-        background: 'rgba(5,5,8,0.9)', backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
+        padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        borderBottom: '1px solid rgba(56,217,245,0.12)',
+        background: 'rgba(8,8,20,0.92)', backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
         position: 'sticky', top: 0, zIndex: 100,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{
-            width: 34, height: 34, borderRadius: 6,
-            background: 'linear-gradient(135deg, #00F5FF, #BF5FFF)',
+            width: 46, height: 46, borderRadius: 8, overflow: 'hidden',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 16, boxShadow: '0 0 16px rgba(0,245,255,0.4)',
-          }}>⚡</div>
+            background: 'radial-gradient(circle, rgba(56,217,245,0.15) 0%, transparent 70%)',
+            boxShadow: '0 0 20px rgba(56,217,245,0.35)',
+            flexShrink: 0,
+          }}>
+            <img
+              src="/icon.png"
+              alt="Bey Tracker"
+              style={{
+                width: 52, height: 52, objectFit: 'contain',
+                filter: 'brightness(1.4) saturate(1.3) contrast(1.1) drop-shadow(0 0 6px rgba(56,217,245,0.7))',
+                mixBlendMode: 'screen',
+              }}
+            />
+          </div>
           <div>
-            <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 10, color: '#00F5FF', textShadow: '0 0 8px #00F5FF', letterSpacing: 1 }}>BEY TRACKER</div>
-            <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 5, color: 'rgba(255,255,255,0.25)', letterSpacing: 1, marginTop: 4 }}>BEYBLADE X STATS</div>
+            <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 10, color: '#38D9F5', textShadow: '0 0 10px #38D9F5, 0 0 20px rgba(56,217,245,0.4)', letterSpacing: 1 }}>BEY TRACKER</div>
+            <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 5, color: 'rgba(200,230,255,0.35)', letterSpacing: 1, marginTop: 4 }}>BEYBLADE X STATS</div>
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <button onClick={() => setShowHelp(true)} style={{
-            width: 38, height: 38, borderRadius: 4, border: '1px solid rgba(255,255,255,0.1)',
-            background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.5)',
+            width: 38, height: 38, borderRadius: 4, border: '1px solid rgba(56,217,245,0.15)',
+            background: 'rgba(56,217,245,0.05)', color: 'rgba(200,235,255,0.55)',
             fontFamily: "'Press Start 2P', monospace", fontSize: 11,
             cursor: 'pointer', WebkitTapHighlightColor: 'transparent',
           }}>?</button>
           <button onClick={() => setShowAdd(true)} style={{
-            padding: '10px 14px', borderRadius: 4, border: '1px solid #00F5FF44',
-            background: 'rgba(0,245,255,0.08)', color: '#00F5FF',
+            padding: '10px 14px', borderRadius: 4, border: '1px solid rgba(56,217,245,0.35)',
+            background: 'rgba(56,217,245,0.1)', color: '#38D9F5',
             fontFamily: "'Press Start 2P', monospace", fontSize: 7,
             cursor: 'pointer', letterSpacing: 0.5,
-            textShadow: '0 0 6px #00F5FF',
-            boxShadow: '0 0 12px rgba(0,245,255,0.15)',
+            textShadow: '0 0 8px #38D9F5',
+            boxShadow: '0 0 14px rgba(56,217,245,0.2)',
             WebkitTapHighlightColor: 'transparent',
           }}>+ NEW</button>
         </div>
@@ -661,13 +672,13 @@ export default function App() {
           <div style={{
             position: 'relative', zIndex: 1, width: '100%', maxWidth: 480,
             background: '#07070c', borderRadius: '12px 12px 0 0',
-            border: '1px solid rgba(0,245,255,0.15)',
+            border: '1px solid rgba(56,217,245,0.15)',
             borderBottom: 'none',
             padding: '28px 20px 40px',
-            boxShadow: '0 -8px 40px rgba(0,245,255,0.1)',
+            boxShadow: '0 -8px 40px rgba(56,217,245,0.1)',
           }}>
             <div style={{ width: 36, height: 4, background: 'rgba(255,255,255,0.15)', borderRadius: 2, margin: '0 auto 24px' }} />
-            <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 10, color: '#00F5FF', textShadow: '0 0 8px #00F5FF', marginBottom: 6 }}>NEW COMBO</div>
+            <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 10, color: '#38D9F5', textShadow: '0 0 8px #38D9F5', marginBottom: 6 }}>NEW COMBO</div>
             <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 6, color: 'rgba(255,255,255,0.3)', marginBottom: 24, letterSpacing: 1 }}>
               BLADE · RATCHET · BIT
             </div>
@@ -688,12 +699,12 @@ export default function App() {
                   placeholder={field.placeholder}
                   style={{
                     width: '100%', padding: '12px 14px', borderRadius: 4,
-                    background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(0,245,255,0.15)',
+                    background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(56,217,245,0.15)',
                     color: '#F1F5F9', fontFamily: "'Press Start 2P', monospace", fontSize: 9,
                     outline: 'none', transition: 'border-color 0.2s',
                   }}
-                  onFocus={e => e.currentTarget.style.borderColor = '#00F5FF'}
-                  onBlur={e => e.currentTarget.style.borderColor = 'rgba(0,245,255,0.15)'}
+                  onFocus={e => e.currentTarget.style.borderColor = '#38D9F5'}
+                  onBlur={e => e.currentTarget.style.borderColor = 'rgba(56,217,245,0.15)'}
                 />
               </div>
             ))}
@@ -708,7 +719,7 @@ export default function App() {
               <button onClick={addCombo} disabled={!newCombo.name.trim()} style={{
                 flex: 2, padding: '14px', borderRadius: 4, border: 'none',
                 background: newCombo.name.trim()
-                  ? 'linear-gradient(135deg, #00F5FF, #BF5FFF)'
+                  ? 'linear-gradient(135deg, #38D9F5, #C97FFF)'
                   : 'rgba(255,255,255,0.05)',
                 color: newCombo.name.trim() ? '#000' : 'rgba(255,255,255,0.2)',
                 fontFamily: "'Press Start 2P', monospace", fontSize: 8, fontWeight: 700,
@@ -724,10 +735,10 @@ export default function App() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rajdhani:wght@700&family=Space+Mono&display=swap');
         * { margin:0; padding:0; box-sizing:border-box; }
-        html, body { background:#050508; overscroll-behavior:none; }
-        input::placeholder { color:rgba(255,255,255,0.12); font-size:8px; }
+        html, body { background:#080814; overscroll-behavior:none; }
+        input::placeholder { color:rgba(180,220,255,0.2); font-size:8px; }
         ::-webkit-scrollbar { width:2px; }
-        ::-webkit-scrollbar-thumb { background:rgba(0,245,255,0.2); }
+        ::-webkit-scrollbar-thumb { background:rgba(56,217,245,0.25); }
         @keyframes fadeInOut {
           0%   { opacity:0; transform:translateX(-50%) translateY(-6px); }
           15%  { opacity:1; transform:translateX(-50%) translateY(0); }
