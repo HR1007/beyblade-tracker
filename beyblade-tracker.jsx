@@ -206,18 +206,30 @@ function LoadingScreen({ progress }) {
         color: 'rgba(200,230,255,0.35)', letterSpacing: 2, marginBottom: 48,
       }}>BEYBLADE X STATS</div>
 
-      {/* Progress bar */}
+      {/* 3-segment progress bar */}
       <div style={{ width: '62%', maxWidth: 260, marginBottom: 14 }}>
-        <div style={{
-          height: 6, background: 'rgba(56,217,245,0.08)', borderRadius: 3,
-          border: '1px solid rgba(56,217,245,0.18)', overflow: 'hidden', position: 'relative',
-        }}>
-          <div style={{
-            height: '100%', width: `${progress}%`,
-            background: 'linear-gradient(90deg, #38D9F5, #C97FFF)',
-            boxShadow: '0 0 10px #38D9F5, 0 0 20px rgba(56,217,245,0.4)',
-            borderRadius: 3, transition: 'width 0.15s ease',
-          }} />
+        <div style={{ display: 'flex', gap: 5 }}>
+          {[
+            { color: '#38D9F5', start: 0,    end: 33.3 },
+            { color: '#C97FFF', start: 33.3, end: 66.6 },
+            { color: '#00FF64', start: 66.6, end: 100  },
+          ].map((seg, i) => {
+            const fill = Math.min(1, Math.max(0, (progress - seg.start) / (seg.end - seg.start)));
+            const isActive = progress >= seg.start && progress < seg.end;
+            return (
+              <div key={i} style={{
+                flex: 1, height: 7, background: `${seg.color}12`, borderRadius: 3,
+                border: `1px solid ${seg.color}30`, overflow: 'hidden',
+              }}>
+                <div style={{
+                  height: '100%', width: `${fill * 100}%`,
+                  background: seg.color,
+                  boxShadow: isActive ? `0 0 8px ${seg.color}, 0 0 18px ${seg.color}66` : 'none',
+                  borderRadius: 3, transition: 'width 0.15s ease',
+                }} />
+              </div>
+            );
+          })}
         </div>
       </div>
       <div style={{
@@ -519,7 +531,7 @@ export default function App() {
     const startTime = Date.now();
     let prog = 0;
     const tick = setInterval(() => {
-      prog = Math.min(prog + Math.random() * 1.8 + 0.6, 90);
+      prog = Math.min(prog + Math.random() * 2.5 + 1.2, 88);
       setLoadingProgress(prog);
     }, 100);
     loadData().then(data => {
@@ -527,7 +539,7 @@ export default function App() {
       setCombos(data);
       setLoaded(true);
       const elapsed = Date.now() - startTime;
-      const remaining = Math.max(0, 5000 - elapsed);
+      const remaining = Math.max(0, 4000 - elapsed);
       setTimeout(() => {
         setLoadingProgress(100);
         setTimeout(() => setShowLoading(false), 450);
