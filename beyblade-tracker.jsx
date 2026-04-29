@@ -24,8 +24,9 @@ const TRANSLATIONS = {
     deleteTitle: 'DELETE COMBO?',
     deleteMsg: 'All battle records for this combo will be permanently lost.',
     btnDeleteConfirm: '🗑 DELETE', btnDeleteCancel: 'KEEP IT',
-    btnCopy: 'COPY',
-    notifWin: 'WIN!', notifLoss: 'LOSS', notifUndo: 'UNDONE', notifCopy: 'COPIED!',
+    btnCopy: 'COPY', btnEdit: 'EDIT',
+    modalEditTitle: 'EDIT COMBO', btnSave: 'SAVE ✓',
+    notifWin: 'WIN!', notifLoss: 'LOSS', notifUndo: 'UNDONE', notifCopy: 'COPIED!', notifSaved: 'SAVED!',
     helpPrev: '◀ PREV', helpNext: 'NEXT ▶', helpStart: 'START ⚡',
     net: 'NET',
     spinFinish: 'SPIN FINISH', overFinish: 'OVER FINISH',
@@ -82,8 +83,9 @@ const TRANSLATIONS = {
     deleteTitle: '確定刪除組合？',
     deleteMsg: '這個組合的所有對戰紀錄將永久消失。',
     btnDeleteConfirm: '🗑 刪除', btnDeleteCancel: '保留',
-    btnCopy: '複製',
-    notifWin: '勝利！', notifLoss: '落敗', notifUndo: '已撤銷', notifCopy: '已複製！',
+    btnCopy: '複製', btnEdit: '編輯',
+    modalEditTitle: '編輯組合', btnSave: '儲存 ✓',
+    notifWin: '勝利！', notifLoss: '落敗', notifUndo: '已撤銷', notifCopy: '已複製！', notifSaved: '已儲存！',
     helpPrev: '◀ 上一頁', helpNext: '下一頁 ▶', helpStart: '開始 ⚡',
     net: '淨分',
     spinFinish: '停轉完成', overFinish: '飛出完成',
@@ -322,7 +324,7 @@ function FinishRow({ finishType: ft, stat, onRecord }) {
 }
 
 // ── Combo Card ────────────────────────────────────────────────
-function ComboCard({ combo, isActive, onSelect, onDelete, onCopy }) {
+function ComboCard({ combo, isActive, onSelect, onDelete, onCopy, onEdit }) {
   const t = useLang();
   const stats = calcStats(combo.stats);
   const col = isActive ? '#38D9F5' : 'rgba(255,255,255,0.15)';
@@ -340,6 +342,11 @@ function ComboCard({ combo, isActive, onSelect, onDelete, onCopy }) {
           {combo.name || t.unnamed}
         </div>
         <div style={{ display:'flex', gap:2, alignItems:'center', flexShrink:0 }}>
+          <button onClick={e => { e.stopPropagation(); onEdit(); }} title={t.btnEdit} style={{
+            background:'transparent', border:'none', color:'rgba(255,179,64,0.4)', cursor:'pointer',
+            fontSize:14, padding:'2px 5px', WebkitTapHighlightColor:'transparent',
+            lineHeight:1, transition:'color 0.15s',
+          }} onMouseEnter={e => e.currentTarget.style.color='#FFB340'} onMouseLeave={e => e.currentTarget.style.color='rgba(255,179,64,0.4)'}>✎</button>
           <button onClick={e => { e.stopPropagation(); onCopy(); }} title={t.btnCopy} style={{
             background:'transparent', border:'none', color:'rgba(56,217,245,0.35)', cursor:'pointer',
             fontSize:14, padding:'2px 5px', WebkitTapHighlightColor:'transparent',
@@ -484,6 +491,8 @@ export default function App() {
   const [lang, setLang] = useState(() => localStorage.getItem('bey-lang') || 'en');
   const [showLoading, setShowLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
+  const [editComboIdx, setEditComboIdx] = useState(null);
+  const [editForm, setEditForm] = useState({ name:'', blade:'', ratchet:'', bit:'' });
   const notifTimer = useRef(null);
 
   const t = TRANSLATIONS[lang];
@@ -491,17 +500,22 @@ export default function App() {
   useEffect(() => { localStorage.setItem('bey-lang', lang); }, [lang]);
 
   useEffect(() => {
+    const startTime = Date.now();
     let prog = 0;
     const tick = setInterval(() => {
-      prog = Math.min(prog + Math.random() * 22 + 8, 88);
+      prog = Math.min(prog + Math.random() * 1.8 + 0.6, 90);
       setLoadingProgress(prog);
-    }, 110);
+    }, 100);
     loadData().then(data => {
       clearInterval(tick);
-      setLoadingProgress(100);
       setCombos(data);
       setLoaded(true);
-      setTimeout(() => setShowLoading(false), 520);
+      const elapsed = Date.now() - startTime;
+      const remaining = Math.max(0, 5000 - elapsed);
+      setTimeout(() => {
+        setLoadingProgress(100);
+        setTimeout(() => setShowLoading(false), 450);
+      }, remaining);
     });
   }, []);
 
@@ -529,6 +543,21 @@ export default function App() {
   const deleteCombo = (idx) => {
     setCombos(prev => prev.filter((_,i) => i !== idx));
     if (activeIdx >= combos.length - 1) setActiveIdx(Math.max(0, combos.length - 2));
+  };
+
+  const openEdit = (idx) => {
+    const src = combos[idx];
+    setEditForm({ name: src.name, blade: src.blade || '', ratchet: src.ratchet || '', bit: src.bit || '' });
+    setEditComboIdx(idx);
+  };
+
+  const saveEdit = () => {
+    if (!editForm.name.trim()) return;
+    setCombos(prev => prev.map((c, i) =>
+      i === editComboIdx ? { ...c, ...editForm } : c
+    ));
+    setEditComboIdx(null);
+    showNotif(t.notifSaved, '#00FF64');
   };
 
   const duplicateCombo = (idx) => {
@@ -599,7 +628,8 @@ export default function App() {
               <ComboCard key={c.id} combo={c} isActive={i === activeIdx}
                 onSelect={() => { setActiveIdx(i); setTab('battle'); }}
                 onDelete={() => setConfirmDelete(i)}
-                onCopy={() => duplicateCombo(i)} />
+                onCopy={() => duplicateCombo(i)}
+                onEdit={() => openEdit(i)} />
             ))}
           </div>
         )}
@@ -867,7 +897,6 @@ export default function App() {
               {lang === 'zh' ? (
                 <>
                   非官方粉絲網站，所有圖片版權歸原始版權所有人所有<br/>
-                  Beyblade X 為 TOMY/Hasbro 之商標及版權財產<br/>
                   開發者：Noah Wen｜
                   <a href="mailto:hungnoah730@gmail.com" style={{ color:'#38D9F5', textDecoration:'none', textShadow:'0 0 6px #38D9F588' }}>
                     hungnoah730@gmail.com
@@ -928,6 +957,61 @@ export default function App() {
                   cursor:'pointer', WebkitTapHighlightColor:'transparent',
                   boxShadow:'0 0 12px rgba(255,92,122,0.2)',
                 }}>{t.btnDeleteConfirm}</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ═══ EDIT COMBO MODAL ═══ */}
+        {editComboIdx !== null && (
+          <div style={{ position:'fixed', inset:0, zIndex:500, display:'flex', alignItems:'flex-end', justifyContent:'center' }}>
+            <div onClick={() => setEditComboIdx(null)} style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.8)', backdropFilter:'blur(8px)', WebkitBackdropFilter:'blur(8px)' }} />
+            <div style={{ position:'relative', zIndex:1, width:'100%', maxWidth:480,
+              background:'#07070c', borderRadius:'12px 12px 0 0',
+              border:'1px solid rgba(255,179,64,0.2)', borderBottom:'none',
+              padding:'28px 20px 40px', boxShadow:'0 -8px 40px rgba(255,179,64,0.1)' }}>
+              <div style={{ width:36, height:4, background:'rgba(255,255,255,0.15)', borderRadius:2, margin:'0 auto 24px' }} />
+              <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:12, color:'#FFB340', textShadow:'0 0 8px #FFB340', marginBottom:6 }}>{t.modalEditTitle}</div>
+              <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:8, color:'rgba(255,255,255,0.3)', marginBottom:24, letterSpacing:1 }}>{t.modalSub}</div>
+
+              {[
+                { key:'name',    label: t.fieldName,    placeholder: t.placeholderName,    required: true },
+                { key:'blade',   label: t.fieldBlade,   placeholder: t.placeholderBlade },
+                { key:'ratchet', label: t.fieldRatchet, placeholder: t.placeholderRatchet },
+                { key:'bit',     label: t.fieldBit,     placeholder: t.placeholderBit },
+              ].map(field => (
+                <div key={field.key} style={{ marginBottom:16 }}>
+                  <label style={{ fontFamily:"'Press Start 2P', monospace", fontSize:9, color:'rgba(255,255,255,0.4)', display:'block', marginBottom:8, letterSpacing:1 }}>
+                    {field.label}{field.required && <span style={{ color:'#FF3C50' }}> *</span>}
+                  </label>
+                  <input value={editForm[field.key]}
+                    onChange={e => setEditForm(prev => ({ ...prev, [field.key]: e.target.value }))}
+                    placeholder={field.placeholder}
+                    style={{ width:'100%', padding:'13px 14px', borderRadius:4,
+                      background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,179,64,0.2)',
+                      color:'#F1F5F9', fontFamily:"'Press Start 2P', monospace", fontSize:10,
+                      outline:'none', transition:'border-color 0.2s' }}
+                    onFocus={e => e.currentTarget.style.borderColor = '#FFB340'}
+                    onBlur={e => e.currentTarget.style.borderColor = 'rgba(255,179,64,0.2)'}
+                  />
+                </div>
+              ))}
+
+              <div style={{ display:'flex', gap:10, marginTop:24 }}>
+                <button onClick={() => setEditComboIdx(null)} style={{
+                  flex:1, padding:'15px', borderRadius:4, border:'1px solid rgba(255,255,255,0.08)',
+                  background:'transparent', color:'rgba(255,255,255,0.4)',
+                  fontFamily:"'Press Start 2P', monospace", fontSize:9, cursor:'pointer',
+                  WebkitTapHighlightColor:'transparent',
+                }}>{t.btnCancel}</button>
+                <button onClick={saveEdit} disabled={!editForm.name.trim()} style={{
+                  flex:2, padding:'15px', borderRadius:4, border:'none',
+                  background: editForm.name.trim() ? 'linear-gradient(135deg, #FFB340, #FF5C7A)' : 'rgba(255,255,255,0.05)',
+                  color: editForm.name.trim() ? '#000' : 'rgba(255,255,255,0.2)',
+                  fontFamily:"'Press Start 2P', monospace", fontSize:9, fontWeight:700,
+                  cursor: editForm.name.trim() ? 'pointer' : 'default',
+                  letterSpacing:1, transition:'all 0.2s', WebkitTapHighlightColor:'transparent',
+                }}>{t.btnSave}</button>
               </div>
             </div>
           </div>
