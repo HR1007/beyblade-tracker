@@ -779,6 +779,23 @@ export default function App() {
     if (!activeCombo) return null;
     return (
       <div style={{ padding:'16px 14px' }}>
+        <HudPanel color="#38D9F5" style={{ marginBottom:14 }}>
+          <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:12, color:'#38D9F5', textShadow:'0 0 8px #38D9F5', marginBottom:10, lineHeight:1.6 }}>
+            {activeCombo.name}
+          </div>
+          <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:14 }}>
+            {activeCombo.blade   && <span style={{ fontFamily:"'Press Start 2P',monospace", fontSize:8, padding:'5px 9px', background:'rgba(56,217,245,0.08)', border:'1px solid #38D9F533', color:'#38D9F5', borderRadius:2 }}>{activeCombo.blade}</span>}
+            {activeCombo.ratchet && <span style={{ fontFamily:"'Press Start 2P',monospace", fontSize:8, padding:'5px 9px', background:'rgba(255,179,64,0.08)',  border:'1px solid #FFB34033', color:'#FFB340', borderRadius:2 }}>{activeCombo.ratchet}</span>}
+            {activeCombo.bit     && <span style={{ fontFamily:"'Press Start 2P',monospace", fontSize:8, padding:'5px 9px', background:'rgba(201,127,255,0.08)', border:'1px solid #C97FFF33', color:'#C97FFF', borderRadius:2 }}>{activeCombo.bit}</span>}
+          </div>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr 1fr', gap:8 }}>
+            <StatChip label={t.winPct} value={activeStats.winRate}     unit="%" color="#00FF64" />
+            <StatChip label={t.wins}   value={activeStats.totalWins}        color="#00FF64" />
+            <StatChip label={t.loss}   value={activeStats.totalLosses}      color="#FF3C50" />
+            <StatChip label={t.avgPt}  value={activeStats.avgWinScore}      color="#38D9F5" />
+          </div>
+        </HudPanel>
+
         <HudPanel color="#C97FFF" title={t.panelBreakdown} style={{ marginBottom:14 }}>
           {FINISH_TYPES.map(ft => {
             const s = activeCombo.stats[ft.key];
