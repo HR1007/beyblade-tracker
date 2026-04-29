@@ -207,31 +207,41 @@ function LoadingScreen({ progress }) {
       }}>BEYBLADE X STATS</div>
 
       {/* 3-segment progress bar */}
-      <div style={{ width: '62%', maxWidth: 260, marginBottom: 14 }}>
-        <div style={{ display: 'flex', gap: 5 }}>
-          {[
-            { color: '#38D9F5', start: 0,    end: 33.3 },
-            { color: '#C97FFF', start: 33.3, end: 66.6 },
-            { color: '#00FF64', start: 66.6, end: 100  },
-          ].map((seg, i) => {
-            const fill = Math.min(1, Math.max(0, (progress - seg.start) / (seg.end - seg.start)));
-            const isActive = progress >= seg.start && progress < seg.end;
-            return (
-              <div key={i} style={{
-                flex: 1, height: 7, background: `${seg.color}12`, borderRadius: 3,
-                border: `1px solid ${seg.color}30`, overflow: 'hidden',
-              }}>
-                <div style={{
-                  height: '100%', width: `${fill * 100}%`,
-                  background: seg.color,
-                  boxShadow: isActive ? `0 0 8px ${seg.color}, 0 0 18px ${seg.color}66` : 'none',
-                  borderRadius: 3, transition: 'width 0.15s ease',
-                }} />
-              </div>
-            );
-          })}
-        </div>
-      </div>
+      {(() => {
+        const segs = [
+          { color: '#38D9F5', start: 0,    end: 33.3 },
+          { color: '#C97FFF', start: 33.3, end: 66.6 },
+          { color: '#00FF64', start: 66.6, end: 100  },
+        ];
+        const activeSeg = segs.find(s => progress >= s.start && progress < s.end) ?? segs[2];
+        const gc = activeSeg.color;
+        return (
+          <div style={{ width: '62%', maxWidth: 260, marginBottom: 14,
+            filter: `drop-shadow(0 0 5px ${gc}bb) drop-shadow(0 0 12px ${gc}55)`,
+            transition: 'filter 0.4s ease',
+          }}>
+            <div style={{
+              height: 8, display: 'flex', borderRadius: 4, overflow: 'hidden',
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.08)',
+            }}>
+              {segs.map((seg, i) => {
+                const fill = Math.min(1, Math.max(0, (progress - seg.start) / (seg.end - seg.start)));
+                return (
+                  <div key={i} style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+                    <div style={{
+                      position: 'absolute', left: 0, top: 0, bottom: 0,
+                      width: `${fill * 100}%`,
+                      background: seg.color,
+                      transition: 'width 0.15s ease',
+                    }} />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })()}
       <div style={{
         fontFamily: "'Press Start 2P', monospace", fontSize: 8,
         color: 'rgba(56,217,245,0.55)', letterSpacing: 2,
