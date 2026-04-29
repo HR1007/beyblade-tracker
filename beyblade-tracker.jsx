@@ -24,9 +24,9 @@ const TRANSLATIONS = {
     deleteTitle: 'DELETE COMBO?',
     deleteMsg: 'All battle records for this combo will be permanently lost.',
     btnDeleteConfirm: '🗑 DELETE', btnDeleteCancel: 'KEEP IT',
-    btnCopy: 'COPY', btnEdit: 'EDIT',
+    btnCopy: 'COPY', btnEdit: 'EDIT', btnShare: 'SHARE', btnExportCSV: 'CSV',
     modalEditTitle: 'EDIT COMBO', btnSave: 'SAVE ✓',
-    notifWin: 'WIN!', notifLoss: 'LOSS', notifUndo: 'UNDONE', notifCopy: 'COPIED!', notifSaved: 'SAVED!',
+    notifWin: 'WIN!', notifLoss: 'LOSS', notifUndo: 'UNDONE', notifCopy: 'COPIED!', notifSaved: 'SAVED!', notifShared: 'COPIED!', notifExported: 'EXPORTED!',
     helpPrev: '◀ PREV', helpNext: 'NEXT ▶', helpStart: 'START ⚡',
     net: 'NET',
     spinFinish: 'SPIN FINISH', overFinish: 'OVER FINISH',
@@ -83,13 +83,13 @@ const TRANSLATIONS = {
     deleteTitle: '確定刪除組合？',
     deleteMsg: '這個組合的所有對戰紀錄將永久消失。',
     btnDeleteConfirm: '🗑 刪除', btnDeleteCancel: '保留',
-    btnCopy: '複製', btnEdit: '編輯',
+    btnCopy: '複製', btnEdit: '編輯', btnShare: '分享', btnExportCSV: 'CSV',
     modalEditTitle: '編輯組合', btnSave: '儲存 ✓',
-    notifWin: '勝利！', notifLoss: '落敗', notifUndo: '已撤銷', notifCopy: '已複製！', notifSaved: '已儲存！',
+    notifWin: '勝利！', notifLoss: '落敗', notifUndo: '已撤銷', notifCopy: '已複製！', notifSaved: '已儲存！', notifShared: '已複製！', notifExported: '已匯出！',
     helpPrev: '◀ 上一頁', helpNext: '下一頁 ▶', helpStart: '開始 ⚡',
     net: '淨分',
-    spinFinish: '停轉完成', overFinish: '飛出完成',
-    burstFinish: '爆裂完成', xtremeFinish: '極限完成',
+    spinFinish: '轉停勝利', overFinish: '飛出勝利',
+    burstFinish: '爆裂勝利', xtremeFinish: '極限勝利',
     panelPerf: '戰鬥表現評價',
     panelGlossary: '數據名詞解釋',
     perfLabel: '每場淨得分評級',
@@ -104,18 +104,18 @@ const TRANSLATIONS = {
       { term: '平均勝分',   formula: '勝利總得分 ÷ 勝場數',            desc: '每次勝利平均獲得的點數，數字越高代表勝利越具決定性。' },
       { term: '淨得分',     formula: '總獲得分 − 總失去分',            desc: '所有對戰的點數總結算，正數表示整體獲利。' },
       { term: '每場淨分',   formula: '淨得分 ÷ 總場數',                desc: '每場對戰平均淨得幾分，是衡量此陀螺實力的核心指標。' },
-      { term: '停轉完成',   formula: '1 分',                           desc: '對手陀螺在場內停止旋轉。' },
-      { term: '飛出完成',   formula: '2 分',                           desc: '對手陀螺被擊飛出場地。' },
-      { term: '爆裂完成',   formula: '2 分',                           desc: '對手陀螺在對戰中爆裂分解。' },
-      { term: '極限完成',   formula: '3 分',                           desc: '對手陀螺碰觸極限線後飛出場地，得分最高。' },
+      { term: '轉停勝利',   formula: '1 分',                           desc: '對手陀螺在場內停止旋轉。' },
+      { term: '飛出勝利',   formula: '2 分',                           desc: '對手陀螺被擊飛出場地。' },
+      { term: '爆裂勝利',   formula: '2 分',                           desc: '對手陀螺在對戰中爆裂分解。' },
+      { term: '極限勝利',   formula: '3 分',                           desc: '對手陀螺碰觸極限線後飛出場地，得分最高。' },
     ],
     help: [
       { icon: '🎮', title: '新增組合', desc: '點擊 [ + 新增 ] 登錄你的陀螺組合，輸入刀刃、棘輪、尖端零件名稱。' },
       { icon: '⚔️', title: '記錄對戰', desc: '切換到「對戰」頁籤，每場結束後點擊對應完成方式的「勝」或「敗」。' },
-      { icon: '🌀', title: '停轉完成', desc: '對手停止旋轉，得 1 分。' },
-      { icon: '💥', title: '飛出完成', desc: '對手飛出場地，得 2 分。' },
-      { icon: '💢', title: '爆裂完成', desc: '對手陀螺爆裂分解，得 2 分。' },
-      { icon: '⚡', title: '極限完成', desc: '對手碰觸極限線後飛出，得 3 分。' },
+      { icon: '🌀', title: '轉停勝利', desc: '對手停止旋轉，得 1 分。' },
+      { icon: '💥', title: '飛出勝利', desc: '對手飛出場地，得 2 分。' },
+      { icon: '💢', title: '爆裂勝利', desc: '對手陀螺爆裂分解，得 2 分。' },
+      { icon: '⚡', title: '極限勝利', desc: '對手碰觸極限線後飛出，得 3 分。' },
       { icon: '📊', title: '查看數據', desc: '「數據」頁籤顯示分數明細、勝率與每場平均得分。' },
       { icon: '↩', title: '撤銷',     desc: '記錄錯誤？在「對戰」頁籤點擊「取消上一筆」來撤銷最後一次記錄。' },
     ],
@@ -324,7 +324,7 @@ function FinishRow({ finishType: ft, stat, onRecord }) {
 }
 
 // ── Combo Card ────────────────────────────────────────────────
-function ComboCard({ combo, isActive, onSelect, onDelete, onCopy, onEdit }) {
+function ComboCard({ combo, isActive, onSelect, onDelete, onCopy, onEdit, onShare, onExport }) {
   const t = useLang();
   const stats = calcStats(combo.stats);
   const col = isActive ? '#38D9F5' : 'rgba(255,255,255,0.15)';
@@ -358,10 +358,26 @@ function ComboCard({ combo, isActive, onSelect, onDelete, onCopy, onEdit }) {
           }}>✕</button>
         </div>
       </div>
-      <div style={{ display:'flex', gap:12, fontFamily:"'Press Start 2P', monospace", fontSize:8, paddingLeft: isActive ? 8 : 0 }}>
+      <div style={{ display:'flex', gap:12, fontFamily:"'Press Start 2P', monospace", fontSize:8, paddingLeft: isActive ? 8 : 0, marginBottom:10 }}>
         <span style={{ color:'#00FF64' }}>{stats.winRate.toFixed(0)}% {t.tabBattle === '對戰' ? '勝' : 'WIN'}</span>
         <span style={{ color:'rgba(255,255,255,0.3)' }}>{stats.totalBattles} {t.btls}</span>
         <span style={{ color:'#38D9F5' }}>{stats.avgWinScore.toFixed(1)} {t.avg}</span>
+      </div>
+      <div style={{ display:'flex', gap:6, paddingLeft: isActive ? 8 : 0 }}>
+        <button onClick={e => { e.stopPropagation(); onShare(); }} style={{
+          flex:1, padding:'7px 4px', borderRadius:3,
+          border:'1px solid rgba(56,217,245,0.2)', background:'rgba(56,217,245,0.04)',
+          color:'rgba(56,217,245,0.7)', cursor:'pointer',
+          fontFamily:"'Press Start 2P', monospace", fontSize:7, letterSpacing:0.5,
+          WebkitTapHighlightColor:'transparent', transition:'all 0.15s',
+        }}>📤 {t.btnShare}</button>
+        <button onClick={e => { e.stopPropagation(); onExport(); }} style={{
+          flex:1, padding:'7px 4px', borderRadius:3,
+          border:'1px solid rgba(201,127,255,0.2)', background:'rgba(201,127,255,0.04)',
+          color:'rgba(201,127,255,0.7)', cursor:'pointer',
+          fontFamily:"'Press Start 2P', monospace", fontSize:7, letterSpacing:0.5,
+          WebkitTapHighlightColor:'transparent', transition:'all 0.15s',
+        }}>📥 {t.btnExportCSV}</button>
       </div>
     </div>
   );
@@ -560,6 +576,63 @@ export default function App() {
     showNotif(t.notifSaved, '#00FF64');
   };
 
+  const shareCombo = (idx) => {
+    const c = combos[idx];
+    const s = calcStats(c.stats);
+    const lines = [
+      `⚡ ${c.name}`,
+      [c.blade, c.ratchet, c.bit].filter(Boolean).join(' / '),
+      '',
+      `📊 ${lang === 'zh' ? '數據' : 'STATS'}`,
+      `${t.winRate}: ${s.winRate.toFixed(1)}%`,
+      `${t.battles}: ${s.totalBattles} (${s.totalWins}W / ${s.totalLosses}L)`,
+      `${t.avgWinPt}: ${s.avgWinScore.toFixed(2)}`,
+      `${t.netPtBtl}: ${s.avgNetPerBattle.toFixed(2)}`,
+      '',
+      ...FINISH_TYPES.map(ft => `${ft.icon} ${t[ft.labelKey]}: ${c.stats[ft.key].wins}W / ${c.stats[ft.key].losses}L`),
+      '',
+      'Bey Tracker — https://github.com/HR1007/beyblade-tracker',
+    ];
+    const text = lines.join('\n');
+    if (navigator.share) {
+      navigator.share({ title: c.name, text }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(text).then(() => showNotif(t.notifShared, '#38D9F5')).catch(() => {});
+    }
+  };
+
+  const exportCSV = (idx) => {
+    const c = combos[idx];
+    const s = calcStats(c.stats);
+    const esc = (v) => `"${String(v).replace(/"/g, '""')}"`;
+    const row = (...cells) => cells.map(esc).join(',');
+    const rows = [
+      row('Combo', 'Blade', 'Ratchet', 'Bit'),
+      row(c.name, c.blade || '', c.ratchet || '', c.bit || ''),
+      '',
+      row('Finish', 'Points', 'Wins', 'Losses', 'Win Rate%', 'Pts Gained', 'Pts Lost'),
+      ...FINISH_TYPES.map(ft => {
+        const fs = c.stats[ft.key];
+        const tot = fs.wins + fs.losses;
+        return row(ft.key.toUpperCase(), ft.points, fs.wins, fs.losses,
+          tot > 0 ? (fs.wins / tot * 100).toFixed(1) : '0.0',
+          fs.wins * ft.points, fs.losses * ft.points);
+      }),
+      '',
+      row('TOTAL', '', s.totalWins, s.totalLosses, s.winRate.toFixed(1), s.totalGained, s.totalLost),
+      '',
+      row('Win Rate%', 'Avg Win Pt', 'Net Points', 'Net Pt/Btl'),
+      row(s.winRate.toFixed(2), s.avgWinScore.toFixed(2), s.netPoints, s.avgNetPerBattle.toFixed(2)),
+    ];
+    const csv = '﻿' + rows.join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `${c.name || 'combo'}-stats.csv`; a.click();
+    URL.revokeObjectURL(url);
+    showNotif(t.notifExported, '#C97FFF');
+  };
+
   const duplicateCombo = (idx) => {
     const src = combos[idx];
     const suffix = lang === 'zh' ? ' (複製)' : ' (COPY)';
@@ -629,7 +702,9 @@ export default function App() {
                 onSelect={() => { setActiveIdx(i); setTab('battle'); }}
                 onDelete={() => setConfirmDelete(i)}
                 onCopy={() => duplicateCombo(i)}
-                onEdit={() => openEdit(i)} />
+                onEdit={() => openEdit(i)}
+                onShare={() => shareCombo(i)}
+                onExport={() => exportCSV(i)} />
             ))}
           </div>
         )}
