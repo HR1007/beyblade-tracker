@@ -24,7 +24,8 @@ const TRANSLATIONS = {
     deleteTitle: 'DELETE COMBO?',
     deleteMsg: 'All battle records for this combo will be permanently lost.',
     btnDeleteConfirm: '🗑 DELETE', btnDeleteCancel: 'KEEP IT',
-    notifWin: 'WIN!', notifLoss: 'LOSS', notifUndo: 'UNDONE',
+    btnCopy: 'COPY',
+    notifWin: 'WIN!', notifLoss: 'LOSS', notifUndo: 'UNDONE', notifCopy: 'COPIED!',
     helpPrev: '◀ PREV', helpNext: 'NEXT ▶', helpStart: 'START ⚡',
     net: 'NET',
     spinFinish: 'SPIN FINISH', overFinish: 'OVER FINISH',
@@ -81,7 +82,8 @@ const TRANSLATIONS = {
     deleteTitle: '確定刪除組合？',
     deleteMsg: '這個組合的所有對戰紀錄將永久消失。',
     btnDeleteConfirm: '🗑 刪除', btnDeleteCancel: '保留',
-    notifWin: '勝利！', notifLoss: '落敗', notifUndo: '已撤銷',
+    btnCopy: '複製',
+    notifWin: '勝利！', notifLoss: '落敗', notifUndo: '已撤銷', notifCopy: '已複製！',
     helpPrev: '◀ 上一頁', helpNext: '下一頁 ▶', helpStart: '開始 ⚡',
     net: '淨分',
     spinFinish: '停轉完成', overFinish: '飛出完成',
@@ -163,6 +165,67 @@ function getPerformanceTier(avgNetPerBattle) {
   return                               { tier: 'losing',   color: '#FF5C7A', bar: '#FF5C7A', icon: '📉' };
 }
 
+// ── Loading Screen ────────────────────────────────────────────
+function LoadingScreen({ progress }) {
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 1000, background: '#080814',
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+      backgroundImage: 'radial-gradient(ellipse at 20% 10%, rgba(56,217,245,0.1) 0%, transparent 55%), radial-gradient(ellipse at 80% 90%, rgba(201,127,255,0.1) 0%, transparent 55%)',
+    }}>
+      {/* Scanlines */}
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none',
+        backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px)' }} />
+
+      {/* Icon */}
+      <div style={{
+        position: 'relative', marginBottom: 36,
+        width: 120, height: 120, borderRadius: 24, overflow: 'hidden',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: 'radial-gradient(circle, rgba(56,217,245,0.18) 0%, transparent 70%)',
+        boxShadow: '0 0 50px rgba(56,217,245,0.45), 0 0 100px rgba(56,217,245,0.15)',
+        animation: 'iconPulse 2s ease-in-out infinite',
+      }}>
+        <img src="/icon.png" alt="Bey Tracker" style={{
+          width: 130, height: 130, objectFit: 'contain',
+          filter: 'brightness(1.4) saturate(1.3) contrast(1.1) drop-shadow(0 0 12px rgba(56,217,245,0.9))',
+          mixBlendMode: 'screen',
+        }} />
+      </div>
+
+      {/* Title */}
+      <div style={{
+        fontFamily: "'Press Start 2P', monospace", fontSize: 18, color: '#38D9F5',
+        textShadow: '0 0 16px #38D9F5, 0 0 36px rgba(56,217,245,0.5)',
+        letterSpacing: 2, marginBottom: 10,
+      }}>BEY TRACKER</div>
+      <div style={{
+        fontFamily: "'Press Start 2P', monospace", fontSize: 8,
+        color: 'rgba(200,230,255,0.35)', letterSpacing: 2, marginBottom: 48,
+      }}>BEYBLADE X STATS</div>
+
+      {/* Progress bar */}
+      <div style={{ width: '62%', maxWidth: 260, marginBottom: 14 }}>
+        <div style={{
+          height: 6, background: 'rgba(56,217,245,0.08)', borderRadius: 3,
+          border: '1px solid rgba(56,217,245,0.18)', overflow: 'hidden', position: 'relative',
+        }}>
+          <div style={{
+            height: '100%', width: `${progress}%`,
+            background: 'linear-gradient(90deg, #38D9F5, #C97FFF)',
+            boxShadow: '0 0 10px #38D9F5, 0 0 20px rgba(56,217,245,0.4)',
+            borderRadius: 3, transition: 'width 0.15s ease',
+          }} />
+        </div>
+      </div>
+      <div style={{
+        fontFamily: "'Press Start 2P', monospace", fontSize: 8,
+        color: 'rgba(56,217,245,0.55)', letterSpacing: 2,
+      }}>LOADING... {Math.round(progress)}%</div>
+    </div>
+  );
+}
+
 // ── HUD Panel ─────────────────────────────────────────────────
 function HudPanel({ children, color = '#38D9F5', style = {}, title }) {
   const c = color;
@@ -181,7 +244,7 @@ function HudPanel({ children, color = '#38D9F5', style = {}, title }) {
       padding: title ? '36px 16px 16px' : '16px', boxShadow:`0 0 20px ${c}10, inset 0 0 20px rgba(0,0,0,0.5)`, ...style }}>
       {title && (
         <div style={{ position:'absolute', top:-1, left:12, background:'#080814', padding:'0 8px',
-          fontFamily:"'Press Start 2P', monospace", fontSize:8, color:c, letterSpacing:1, textShadow:`0 0 8px ${c}` }}>
+          fontFamily:"'Press Start 2P', monospace", fontSize:9, color:c, letterSpacing:1, textShadow:`0 0 8px ${c}` }}>
           {title}
         </div>
       )}
@@ -199,9 +262,9 @@ function StatChip({ label, value, color = '#38D9F5', unit = '' }) {
       <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:16, color,
         textShadow:`0 0 12px ${color}, 0 0 24px ${color}88`, lineHeight:1 }}>
         {typeof value === 'number' ? (Number.isInteger(value) ? value : value.toFixed(1)) : value}
-        {unit && <span style={{ fontSize:9 }}>{unit}</span>}
+        {unit && <span style={{ fontSize:10 }}>{unit}</span>}
       </div>
-      <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:6,
+      <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:8,
         color:'rgba(255,255,255,0.35)', letterSpacing:1, textAlign:'center' }}>{label}</div>
     </div>
   );
@@ -215,11 +278,11 @@ function FlashButton({ onClick, children, variant = 'win' }) {
   const handle = () => { setFlash(true); setTimeout(() => setFlash(false), 200); onClick(); };
   return (
     <button onClick={handle} style={{
-      flex:1, padding:'14px 8px', borderRadius:4,
+      flex:1, padding:'16px 8px', borderRadius:4,
       border:`1px solid ${flash ? col : col + '44'}`,
       background: flash ? col + '35' : col + '08',
       color:col, cursor:'pointer',
-      fontFamily:"'Press Start 2P', monospace", fontSize:9, letterSpacing:0.5,
+      fontFamily:"'Press Start 2P', monospace", fontSize:11, letterSpacing:0.5,
       transition:'all 0.15s',
       textShadow: flash ? `0 0 8px ${col}` : 'none',
       boxShadow: flash ? `0 0 16px ${col}66` : 'none',
@@ -237,13 +300,13 @@ function FinishRow({ finishType: ft, stat, onRecord }) {
     <div style={{ marginBottom:12, padding:'14px 12px', background:`${ft.color}08`, border:`1px solid ${ft.color}22`, borderRadius:4 }}>
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10 }}>
         <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-          <span style={{ fontSize:18 }}>{ft.icon}</span>
+          <span style={{ fontSize:20 }}>{ft.icon}</span>
           <div>
-            <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:7, color:ft.color, textShadow:`0 0 6px ${ft.color}`, letterSpacing:0.5 }}>{t[ft.labelKey]}</div>
-            <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:6, color:'rgba(255,255,255,0.3)', marginTop:4 }}>{ft.desc}</div>
+            <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:9, color:ft.color, textShadow:`0 0 6px ${ft.color}`, letterSpacing:0.5 }}>{t[ft.labelKey]}</div>
+            <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:7, color:'rgba(255,255,255,0.3)', marginTop:4 }}>{ft.desc}</div>
           </div>
         </div>
-        <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:7, color:'rgba(255,255,255,0.3)' }}>
+        <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:8, color:'rgba(255,255,255,0.3)' }}>
           <span style={{ color:'#00FF64' }}>{stat.wins}W</span> / <span style={{ color:'#FF3C50' }}>{stat.losses}L</span>
         </div>
       </div>
@@ -259,7 +322,7 @@ function FinishRow({ finishType: ft, stat, onRecord }) {
 }
 
 // ── Combo Card ────────────────────────────────────────────────
-function ComboCard({ combo, isActive, onSelect, onDelete }) {
+function ComboCard({ combo, isActive, onSelect, onDelete, onCopy }) {
   const t = useLang();
   const stats = calcStats(combo.stats);
   const col = isActive ? '#38D9F5' : 'rgba(255,255,255,0.15)';
@@ -273,12 +336,22 @@ function ComboCard({ combo, isActive, onSelect, onDelete }) {
     }}>
       {isActive && <div style={{ position:'absolute', left:0, top:0, bottom:0, width:3, background:'#38D9F5', boxShadow:'0 0 8px #38D9F5', borderRadius:'4px 0 0 4px' }} />}
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:8, paddingLeft: isActive ? 8 : 0 }}>
-        <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:8, color:col, textShadow: isActive ? '0 0 6px #38D9F5' : 'none', letterSpacing:0.5, lineHeight:1.5, flex:1, paddingRight:8 }}>
+        <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:10, color:col, textShadow: isActive ? '0 0 6px #38D9F5' : 'none', letterSpacing:0.5, lineHeight:1.5, flex:1, paddingRight:8 }}>
           {combo.name || t.unnamed}
         </div>
-        <button onClick={e => { e.stopPropagation(); onDelete(); }} style={{ background:'transparent', border:'none', color:'rgba(255,255,255,0.2)', cursor:'pointer', fontSize:12, padding:'0 4px', WebkitTapHighlightColor:'transparent' }}>✕</button>
+        <div style={{ display:'flex', gap:2, alignItems:'center', flexShrink:0 }}>
+          <button onClick={e => { e.stopPropagation(); onCopy(); }} title={t.btnCopy} style={{
+            background:'transparent', border:'none', color:'rgba(56,217,245,0.35)', cursor:'pointer',
+            fontSize:14, padding:'2px 5px', WebkitTapHighlightColor:'transparent',
+            lineHeight:1, transition:'color 0.15s',
+          }} onMouseEnter={e => e.currentTarget.style.color='#38D9F5'} onMouseLeave={e => e.currentTarget.style.color='rgba(56,217,245,0.35)'}>⊕</button>
+          <button onClick={e => { e.stopPropagation(); onDelete(); }} style={{
+            background:'transparent', border:'none', color:'rgba(255,255,255,0.2)', cursor:'pointer',
+            fontSize:13, padding:'2px 5px', WebkitTapHighlightColor:'transparent',
+          }}>✕</button>
+        </div>
       </div>
-      <div style={{ display:'flex', gap:12, fontFamily:"'Press Start 2P', monospace", fontSize:6, paddingLeft: isActive ? 8 : 0 }}>
+      <div style={{ display:'flex', gap:12, fontFamily:"'Press Start 2P', monospace", fontSize:8, paddingLeft: isActive ? 8 : 0 }}>
         <span style={{ color:'#00FF64' }}>{stats.winRate.toFixed(0)}% {t.tabBattle === '對戰' ? '勝' : 'WIN'}</span>
         <span style={{ color:'rgba(255,255,255,0.3)' }}>{stats.totalBattles} {t.btls}</span>
         <span style={{ color:'#38D9F5' }}>{stats.avgWinScore.toFixed(1)} {t.avg}</span>
@@ -311,28 +384,28 @@ function HelpModal({ onClose }) {
         </div>
         <div style={{ textAlign:'center', minHeight:140, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'0 8px' }}>
           <div style={{ fontSize:40, marginBottom:16 }}>{s.icon}</div>
-          <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:9, color:'#38D9F5', textShadow:'0 0 8px #38D9F5', marginBottom:16, letterSpacing:1 }}>{s.title}</div>
-          <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:7, color:'rgba(255,255,255,0.5)', lineHeight:2, maxWidth:320 }}>{s.desc}</div>
+          <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:10, color:'#38D9F5', textShadow:'0 0 8px #38D9F5', marginBottom:16, letterSpacing:1 }}>{s.title}</div>
+          <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:8, color:'rgba(255,255,255,0.5)', lineHeight:2.2, maxWidth:320 }}>{s.desc}</div>
         </div>
         <div style={{ display:'flex', gap:10, marginTop:28 }}>
           <button onClick={() => setStep(p => Math.max(0, p-1))} disabled={step === 0} style={{
-            flex:1, padding:'13px', borderRadius:4, border:'1px solid rgba(255,255,255,0.08)',
+            flex:1, padding:'14px', borderRadius:4, border:'1px solid rgba(255,255,255,0.08)',
             background:'transparent', color: step===0 ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.5)',
-            fontFamily:"'Press Start 2P', monospace", fontSize:8, cursor: step===0 ? 'default' : 'pointer',
+            fontFamily:"'Press Start 2P', monospace", fontSize:9, cursor: step===0 ? 'default' : 'pointer',
             WebkitTapHighlightColor:'transparent',
           }}>{t.helpPrev}</button>
           {step < steps.length - 1 ? (
             <button onClick={() => setStep(p => p+1)} style={{
-              flex:2, padding:'13px', borderRadius:4, border:'none',
+              flex:2, padding:'14px', borderRadius:4, border:'none',
               background:'linear-gradient(135deg, #38D9F5, #C97FFF)', color:'#000',
-              fontFamily:"'Press Start 2P', monospace", fontSize:8, cursor:'pointer',
+              fontFamily:"'Press Start 2P', monospace", fontSize:9, cursor:'pointer',
               WebkitTapHighlightColor:'transparent',
             }}>{t.helpNext}</button>
           ) : (
             <button onClick={onClose} style={{
-              flex:2, padding:'13px', borderRadius:4, border:'none',
+              flex:2, padding:'14px', borderRadius:4, border:'none',
               background:'linear-gradient(135deg, #00FF64, #38D9F5)', color:'#000',
-              fontFamily:"'Press Start 2P', monospace", fontSize:8, cursor:'pointer',
+              fontFamily:"'Press Start 2P', monospace", fontSize:9, cursor:'pointer',
               WebkitTapHighlightColor:'transparent',
             }}>{t.helpStart}</button>
           )}
@@ -358,13 +431,13 @@ function TabBar({ tab, setTab, hasCombos }) {
         const active = tab === tt.key;
         return (
           <button key={tt.key} onClick={() => !tt.disabled && setTab(tt.key)} style={{
-            flex:1, padding:'12px 4px 10px', background:'transparent', border:'none',
+            flex:1, padding:'13px 4px 11px', background:'transparent', border:'none',
             cursor: tt.disabled ? 'default' : 'pointer',
-            display:'flex', flexDirection:'column', alignItems:'center', gap:4,
+            display:'flex', flexDirection:'column', alignItems:'center', gap:5,
             opacity: tt.disabled ? 0.3 : 1, WebkitTapHighlightColor:'transparent',
           }}>
-            <span style={{ fontSize:18 }}>{tt.icon}</span>
-            <span style={{ fontFamily:"'Press Start 2P', monospace", fontSize:6,
+            <span style={{ fontSize:20 }}>{tt.icon}</span>
+            <span style={{ fontFamily:"'Press Start 2P', monospace", fontSize:8,
               color: active ? '#38D9F5' : 'rgba(180,220,255,0.35)',
               textShadow: active ? '0 0 8px #38D9F5' : 'none' }}>{tt.label}</span>
             {active && <div style={{ width:24, height:2, background:'#38D9F5', boxShadow:'0 0 6px #38D9F5', borderRadius:1 }} />}
@@ -379,17 +452,17 @@ function TabBar({ tab, setTab, hasCombos }) {
 function LangToggle({ lang, setLang }) {
   return (
     <button onClick={() => setLang(l => l === 'en' ? 'zh' : 'en')} style={{
-      padding:'0 10px', height:38, borderRadius:4,
+      padding:'0 12px', height:40, borderRadius:4,
       border:'1px solid rgba(56,217,245,0.2)',
       background:'rgba(56,217,245,0.05)',
       cursor:'pointer', WebkitTapHighlightColor:'transparent',
-      display:'flex', alignItems:'center', gap:5,
+      display:'flex', alignItems:'center', gap:6,
     }}>
-      <span style={{ fontFamily:"'Press Start 2P', monospace", fontSize:7,
+      <span style={{ fontFamily:"'Press Start 2P', monospace", fontSize:8,
         color: lang === 'zh' ? '#38D9F5' : 'rgba(180,220,255,0.35)',
         textShadow: lang === 'zh' ? '0 0 6px #38D9F5' : 'none', transition:'all 0.2s' }}>中</span>
-      <span style={{ color:'rgba(255,255,255,0.15)', fontSize:10 }}>|</span>
-      <span style={{ fontFamily:"'Press Start 2P', monospace", fontSize:7,
+      <span style={{ color:'rgba(255,255,255,0.15)', fontSize:11 }}>|</span>
+      <span style={{ fontFamily:"'Press Start 2P', monospace", fontSize:8,
         color: lang === 'en' ? '#38D9F5' : 'rgba(180,220,255,0.35)',
         textShadow: lang === 'en' ? '0 0 6px #38D9F5' : 'none', transition:'all 0.2s' }}>EN</span>
     </button>
@@ -407,14 +480,31 @@ export default function App() {
   const [tab, setTab] = useState('combos');
   const [notification, setNotification] = useState(null);
   const [showHelp, setShowHelp] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState(null); // index to delete, or null
+  const [confirmDelete, setConfirmDelete] = useState(null);
   const [lang, setLang] = useState(() => localStorage.getItem('bey-lang') || 'en');
+  const [showLoading, setShowLoading] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState(0);
   const notifTimer = useRef(null);
 
   const t = TRANSLATIONS[lang];
 
   useEffect(() => { localStorage.setItem('bey-lang', lang); }, [lang]);
-  useEffect(() => { loadData().then(data => { setCombos(data); setLoaded(true); }); }, []);
+
+  useEffect(() => {
+    let prog = 0;
+    const tick = setInterval(() => {
+      prog = Math.min(prog + Math.random() * 22 + 8, 88);
+      setLoadingProgress(prog);
+    }, 110);
+    loadData().then(data => {
+      clearInterval(tick);
+      setLoadingProgress(100);
+      setCombos(data);
+      setLoaded(true);
+      setTimeout(() => setShowLoading(false), 520);
+    });
+  }, []);
+
   useEffect(() => { if (loaded) saveData(combos); }, [combos, loaded]);
 
   const activeCombo = combos[activeIdx] || null;
@@ -439,6 +529,22 @@ export default function App() {
   const deleteCombo = (idx) => {
     setCombos(prev => prev.filter((_,i) => i !== idx));
     if (activeIdx >= combos.length - 1) setActiveIdx(Math.max(0, combos.length - 2));
+  };
+
+  const duplicateCombo = (idx) => {
+    const src = combos[idx];
+    const suffix = lang === 'zh' ? ' (複製)' : ' (COPY)';
+    const copy = {
+      id: Date.now(),
+      name: src.name + suffix,
+      blade: src.blade,
+      ratchet: src.ratchet,
+      bit: src.bit,
+      stats: DEFAULT_STATS(),
+    };
+    setCombos(prev => [...prev, copy]);
+    setActiveIdx(combos.length);
+    showNotif(t.notifCopy, '#38D9F5');
   };
 
   const recordResult = useCallback((finishKey, result) => {
@@ -483,7 +589,7 @@ export default function App() {
         {combos.length === 0 ? (
           <div style={{ textAlign:'center', padding:'32px 0' }}>
             <div style={{ fontSize:48, marginBottom:16 }}>⚡</div>
-            <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:8, color:'rgba(255,255,255,0.4)', lineHeight:2.2 }}>
+            <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:10, color:'rgba(255,255,255,0.4)', lineHeight:2.2 }}>
               {t.noCombos[0]}<br/>{t.noCombos[1]}
             </div>
           </div>
@@ -492,7 +598,8 @@ export default function App() {
             {combos.map((c,i) => (
               <ComboCard key={c.id} combo={c} isActive={i === activeIdx}
                 onSelect={() => { setActiveIdx(i); setTab('battle'); }}
-                onDelete={() => setConfirmDelete(i)} />
+                onDelete={() => setConfirmDelete(i)}
+                onCopy={() => duplicateCombo(i)} />
             ))}
           </div>
         )}
@@ -506,7 +613,7 @@ export default function App() {
             <StatChip label={t.avgWinPt}  value={globalStats.avgWinScore}         color="#38D9F5" />
             <StatChip label={t.netPtBtl}  value={globalStats.avgNetPerBattle}     color="#C97FFF" />
           </div>
-          <div style={{ display:'flex', justifyContent:'center', gap:20, marginTop:14, fontFamily:"'Press Start 2P', monospace", fontSize:7 }}>
+          <div style={{ display:'flex', justifyContent:'center', gap:20, marginTop:14, fontFamily:"'Press Start 2P', monospace", fontSize:8 }}>
             <span style={{ color:'#00FF64' }}>+{globalStats.totalGained}</span>
             <span style={{ color:'rgba(255,255,255,0.3)' }}>|</span>
             <span style={{ color:'#FF3C50' }}>-{globalStats.totalLost}</span>
@@ -522,20 +629,20 @@ export default function App() {
 
   const renderBattlePanel = () => {
     if (!activeCombo) return (
-      <div style={{ padding:24, textAlign:'center', color:'rgba(255,255,255,0.3)', fontFamily:"'Press Start 2P', monospace", fontSize:8, lineHeight:2 }}>
+      <div style={{ padding:24, textAlign:'center', color:'rgba(255,255,255,0.3)', fontFamily:"'Press Start 2P', monospace", fontSize:10, lineHeight:2 }}>
         {t.selectCombo[0]}<br/>{t.selectCombo[1]}
       </div>
     );
     return (
       <div style={{ padding:'16px 14px' }}>
         <HudPanel color="#38D9F5" style={{ marginBottom:14 }}>
-          <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:10, color:'#38D9F5', textShadow:'0 0 8px #38D9F5', marginBottom:10, lineHeight:1.6 }}>
+          <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:12, color:'#38D9F5', textShadow:'0 0 8px #38D9F5', marginBottom:10, lineHeight:1.6 }}>
             {activeCombo.name}
           </div>
           <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:14 }}>
-            {activeCombo.blade   && <span style={{ fontFamily:"'Press Start 2P',monospace", fontSize:6, padding:'4px 8px', background:'rgba(56,217,245,0.08)', border:'1px solid #38D9F533', color:'#38D9F5', borderRadius:2 }}>{activeCombo.blade}</span>}
-            {activeCombo.ratchet && <span style={{ fontFamily:"'Press Start 2P',monospace", fontSize:6, padding:'4px 8px', background:'rgba(255,179,64,0.08)',  border:'1px solid #FFB34033', color:'#FFB340', borderRadius:2 }}>{activeCombo.ratchet}</span>}
-            {activeCombo.bit     && <span style={{ fontFamily:"'Press Start 2P',monospace", fontSize:6, padding:'4px 8px', background:'rgba(201,127,255,0.08)', border:'1px solid #C97FFF33', color:'#C97FFF', borderRadius:2 }}>{activeCombo.bit}</span>}
+            {activeCombo.blade   && <span style={{ fontFamily:"'Press Start 2P',monospace", fontSize:8, padding:'5px 9px', background:'rgba(56,217,245,0.08)', border:'1px solid #38D9F533', color:'#38D9F5', borderRadius:2 }}>{activeCombo.blade}</span>}
+            {activeCombo.ratchet && <span style={{ fontFamily:"'Press Start 2P',monospace", fontSize:8, padding:'5px 9px', background:'rgba(255,179,64,0.08)',  border:'1px solid #FFB34033', color:'#FFB340', borderRadius:2 }}>{activeCombo.ratchet}</span>}
+            {activeCombo.bit     && <span style={{ fontFamily:"'Press Start 2P',monospace", fontSize:8, padding:'5px 9px', background:'rgba(201,127,255,0.08)', border:'1px solid #C97FFF33', color:'#C97FFF', borderRadius:2 }}>{activeCombo.bit}</span>}
           </div>
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr 1fr', gap:8 }}>
             <StatChip label={t.winPct} value={activeStats.winRate}     unit="%" color="#00FF64" />
@@ -553,9 +660,9 @@ export default function App() {
 
         {undoStack.length > 0 && (
           <button onClick={undo} style={{
-            width:'100%', padding:'12px', border:'1px solid #FFB34044',
+            width:'100%', padding:'14px', border:'1px solid #FFB34044',
             background:'rgba(255,179,64,0.06)', color:'#FFB340',
-            fontFamily:"'Press Start 2P', monospace", fontSize:8, cursor:'pointer',
+            fontFamily:"'Press Start 2P', monospace", fontSize:10, cursor:'pointer',
             borderRadius:4, letterSpacing:1, WebkitTapHighlightColor:'transparent',
           }}>{t.btnUndo}</button>
         )}
@@ -573,8 +680,8 @@ export default function App() {
             return (
               <div key={ft.key} style={{ marginBottom:12, padding:'10px 10px', background:`${ft.color}08`, border:`1px solid ${ft.color}22`, borderRadius:4 }}>
                 <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
-                  <span style={{ fontFamily:"'Press Start 2P', monospace", fontSize:7, color:ft.color }}>{ft.icon} {t[ft.labelKey]}</span>
-                  <span style={{ fontFamily:"'Press Start 2P', monospace", fontSize:6, color:'rgba(255,255,255,0.3)' }}>{ft.points}PT</span>
+                  <span style={{ fontFamily:"'Press Start 2P', monospace", fontSize:8, color:ft.color }}>{ft.icon} {t[ft.labelKey]}</span>
+                  <span style={{ fontFamily:"'Press Start 2P', monospace", fontSize:7, color:'rgba(255,255,255,0.3)' }}>{ft.points}PT</span>
                 </div>
                 <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr 1fr', gap:8, fontFamily:"'Press Start 2P', monospace" }}>
                   {[
@@ -584,8 +691,8 @@ export default function App() {
                     { v: `-${s.losses*ft.points}`,c:'#FF3C50', l: t.lost },
                   ].map((cell, i) => (
                     <div key={i} style={{ textAlign:'center' }}>
-                      <div style={{ fontSize:12, color:cell.c }}>{cell.v}</div>
-                      <div style={{ fontSize:5, color:'rgba(255,255,255,0.3)', marginTop:4 }}>{cell.l}</div>
+                      <div style={{ fontSize:14, color:cell.c }}>{cell.v}</div>
+                      <div style={{ fontSize:7, color:'rgba(255,255,255,0.3)', marginTop:4 }}>{cell.l}</div>
                     </div>
                   ))}
                 </div>
@@ -602,8 +709,8 @@ export default function App() {
                 { v: `-${activeStats.totalLost}`,                     c:'#FF3C50', l: t.totalMinus },
               ].map((cell, i) => (
                 <div key={i} style={{ textAlign:'center' }}>
-                  <div style={{ fontSize:14, color:cell.c }}>{cell.v}</div>
-                  <div style={{ fontSize:5, color:'rgba(255,255,255,0.3)', marginTop:4 }}>{cell.l}</div>
+                  <div style={{ fontSize:15, color:cell.c }}>{cell.v}</div>
+                  <div style={{ fontSize:7, color:'rgba(255,255,255,0.3)', marginTop:4 }}>{cell.l}</div>
                 </div>
               ))}
             </div>
@@ -611,8 +718,8 @@ export default function App() {
 
           {activeStats.totalBattles > 0 && (
             <div style={{ padding:'10px 12px', background:'rgba(56,217,245,0.04)', border:'1px solid rgba(56,217,245,0.1)', borderRadius:4 }}>
-              <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:6, color:'#38D9F5', marginBottom:8 }}>{t.formulas}</div>
-              <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:6, color:'rgba(255,255,255,0.4)', lineHeight:2.2 }}>
+              <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:7, color:'#38D9F5', marginBottom:8 }}>{t.formulas}</div>
+              <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:7, color:'rgba(255,255,255,0.4)', lineHeight:2.2 }}>
                 AVG WIN = {activeStats.totalGained}/{activeStats.totalWins} = <span style={{ color:'#38D9F5' }}>{activeStats.avgWinScore.toFixed(3)}</span>
                 <br/>
                 NET/BTL = {activeStats.netPoints}/{activeStats.totalBattles} = <span style={{ color:'#C97FFF' }}>{activeStats.avgNetPerBattle.toFixed(3)}</span>
@@ -626,39 +733,35 @@ export default function App() {
           const perf = getPerformanceTier(activeStats.avgNetPerBattle);
           const titleKey = perf.tier === 'dominant' ? 'perfDominantTitle' : perf.tier === 'balanced' ? 'perfBalancedTitle' : 'perfLosingTitle';
           const descKey  = perf.tier === 'dominant' ? 'perfDominantDesc'  : perf.tier === 'balanced' ? 'perfBalancedDesc'  : 'perfLosingDesc';
-          // bar width: map roughly -3..+3 → 0..100%
           const barPct = Math.min(100, Math.max(0, ((activeStats.avgNetPerBattle + 3) / 6) * 100));
           return (
             <HudPanel color={perf.color} title={t.panelPerf} style={{ marginBottom:14 }}>
-              {/* Rating header */}
               <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14 }}>
                 <div style={{ display:'flex', alignItems:'center', gap:10 }}>
                   <span style={{ fontSize:28 }}>{perf.icon}</span>
                   <div>
-                    <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:10, color:perf.color, textShadow:`0 0 10px ${perf.color}`, letterSpacing:0.5 }}>{t[titleKey]}</div>
-                    <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:6, color:'rgba(255,255,255,0.35)', marginTop:6 }}>{t.perfLabel}</div>
+                    <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:11, color:perf.color, textShadow:`0 0 10px ${perf.color}`, letterSpacing:0.5 }}>{t[titleKey]}</div>
+                    <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:7, color:'rgba(255,255,255,0.35)', marginTop:6 }}>{t.perfLabel}</div>
                   </div>
                 </div>
                 <div style={{ textAlign:'right' }}>
                   <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:18, color:perf.color, textShadow:`0 0 12px ${perf.color}` }}>
                     {activeStats.avgNetPerBattle >= 0 ? '+' : ''}{activeStats.avgNetPerBattle.toFixed(2)}
                   </div>
-                  <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:6, color:'rgba(255,255,255,0.3)', marginTop:4 }}>NET/BTL</div>
+                  <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:7, color:'rgba(255,255,255,0.3)', marginTop:4 }}>NET/BTL</div>
                 </div>
               </div>
-              {/* Spectrum bar */}
               <div style={{ marginBottom:14 }}>
                 <div style={{ height:6, background:'rgba(255,255,255,0.06)', borderRadius:3, overflow:'hidden', position:'relative' }}>
                   <div style={{ position:'absolute', left:'50%', top:0, bottom:0, width:1, background:'rgba(255,255,255,0.2)' }} />
                   <div style={{ height:'100%', width:`${barPct}%`, background:`linear-gradient(90deg, #FF5C7A, #FFB340, #00FF64)`, borderRadius:3, transition:'width 0.6s ease' }} />
                 </div>
-                <div style={{ display:'flex', justifyContent:'space-between', marginTop:5, fontFamily:"'Press Start 2P', monospace", fontSize:5, color:'rgba(255,255,255,0.25)' }}>
+                <div style={{ display:'flex', justifyContent:'space-between', marginTop:5, fontFamily:"'Press Start 2P', monospace", fontSize:6, color:'rgba(255,255,255,0.25)' }}>
                   <span>−</span><span>0</span><span>+</span>
                 </div>
               </div>
-              {/* Description */}
               <div style={{ padding:'10px 12px', background:`${perf.color}08`, border:`1px solid ${perf.color}22`, borderRadius:4 }}>
-                <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:7, color:'rgba(255,255,255,0.55)', lineHeight:2.2 }}>{t[descKey]}</div>
+                <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:8, color:'rgba(255,255,255,0.55)', lineHeight:2.2 }}>{t[descKey]}</div>
               </div>
             </HudPanel>
           );
@@ -670,12 +773,12 @@ export default function App() {
             <div key={i} style={{ marginBottom: i < t.glossaryItems.length - 1 ? 10 : 0,
               padding:'10px 12px', background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.05)', borderRadius:4 }}>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
-                <span style={{ fontFamily:"'Press Start 2P', monospace", fontSize:7, color:'#C97FFF' }}>{item.term}</span>
-                <span style={{ fontFamily:"'Press Start 2P', monospace", fontSize:6, color:'rgba(255,255,255,0.25)',
+                <span style={{ fontFamily:"'Press Start 2P', monospace", fontSize:8, color:'#C97FFF' }}>{item.term}</span>
+                <span style={{ fontFamily:"'Press Start 2P', monospace", fontSize:7, color:'rgba(255,255,255,0.25)',
                   background:'rgba(201,127,255,0.08)', border:'1px solid rgba(201,127,255,0.2)',
                   padding:'2px 7px', borderRadius:3 }}>{item.formula}</span>
               </div>
-              <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:6, color:'rgba(255,255,255,0.4)', lineHeight:2 }}>{item.desc}</div>
+              <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:7, color:'rgba(255,255,255,0.4)', lineHeight:2 }}>{item.desc}</div>
             </div>
           ))}
         </HudPanel>
@@ -692,10 +795,11 @@ export default function App() {
 
   return (
     <LangCtx.Provider value={t}>
+      {showLoading && <LoadingScreen progress={loadingProgress} />}
       <div style={{
         minHeight:'100vh', width:'100%', background:'#080814',
         backgroundImage:'radial-gradient(ellipse at 20% 10%, rgba(56,217,245,0.07) 0%, transparent 55%), radial-gradient(ellipse at 80% 90%, rgba(201,127,255,0.07) 0%, transparent 55%), radial-gradient(ellipse at 50% 50%, rgba(30,30,80,0.5) 0%, transparent 70%)',
-        color:'#E8F4FF', paddingBottom:72, overflowX:'hidden',
+        color:'#E8F4FF', paddingBottom:76, overflowX:'hidden',
       }}>
         {/* Scanline */}
         <div style={{ position:'fixed', inset:0, zIndex:300, pointerEvents:'none',
@@ -728,23 +832,23 @@ export default function App() {
               }} />
             </div>
             <div>
-              <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:10, color:'#38D9F5',
+              <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:12, color:'#38D9F5',
                 textShadow:'0 0 10px #38D9F5, 0 0 20px rgba(56,217,245,0.4)', letterSpacing:1 }}>BEY TRACKER</div>
-              <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:5, color:'rgba(200,230,255,0.35)', letterSpacing:1, marginTop:4 }}>{t.appSubtitle}</div>
+              <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:7, color:'rgba(200,230,255,0.35)', letterSpacing:1, marginTop:4 }}>{t.appSubtitle}</div>
             </div>
           </div>
           <div style={{ display:'flex', gap:6 }}>
             <LangToggle lang={lang} setLang={setLang} />
             <button onClick={() => setShowHelp(true)} style={{
-              width:38, height:38, borderRadius:4, border:'1px solid rgba(56,217,245,0.15)',
+              width:40, height:40, borderRadius:4, border:'1px solid rgba(56,217,245,0.15)',
               background:'rgba(56,217,245,0.05)', color:'rgba(200,235,255,0.55)',
-              fontFamily:"'Press Start 2P', monospace", fontSize:11, cursor:'pointer',
+              fontFamily:"'Press Start 2P', monospace", fontSize:12, cursor:'pointer',
               WebkitTapHighlightColor:'transparent',
             }}>?</button>
             <button onClick={() => setShowAdd(true)} style={{
               padding:'10px 14px', borderRadius:4, border:'1px solid rgba(56,217,245,0.35)',
               background:'rgba(56,217,245,0.1)', color:'#38D9F5',
-              fontFamily:"'Press Start 2P', monospace", fontSize:7, cursor:'pointer',
+              fontFamily:"'Press Start 2P', monospace", fontSize:8, cursor:'pointer',
               letterSpacing:0.5, textShadow:'0 0 8px #38D9F5',
               boxShadow:'0 0 14px rgba(56,217,245,0.2)', WebkitTapHighlightColor:'transparent',
             }}>{t.btnNew}</button>
@@ -756,6 +860,31 @@ export default function App() {
           {tab === 'combos' && renderCombosPanel()}
           {tab === 'battle' && renderBattlePanel()}
           {tab === 'stats'  && renderStatsPanel()}
+
+          {/* Footer */}
+          <div style={{ padding:'20px 20px 10px', textAlign:'center', borderTop:'1px solid rgba(255,255,255,0.05)', marginTop:8 }}>
+            <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:7, color:'rgba(255,255,255,0.18)', lineHeight:2.4, letterSpacing:0.5 }}>
+              {lang === 'zh' ? (
+                <>
+                  非官方粉絲網站，所有圖片版權歸原始版權所有人所有<br/>
+                  Beyblade X 為 TOMY/Hasbro 之商標及版權財產<br/>
+                  開發者：Noah Wen｜
+                  <a href="mailto:hungnoah730@gmail.com" style={{ color:'#38D9F5', textDecoration:'none', textShadow:'0 0 6px #38D9F588' }}>
+                    hungnoah730@gmail.com
+                  </a>
+                </>
+              ) : (
+                <>
+                  Unofficial fan website. Images &amp; trademarks belong to their respective owners.<br/>
+                  Beyblade X is a trademark of TOMY / Hasbro. Not affiliated with or endorsed by TOMY / Hasbro.<br/>
+                  Developed by Noah Wen｜
+                  <a href="mailto:hungnoah730@gmail.com" style={{ color:'#38D9F5', textDecoration:'none', textShadow:'0 0 6px #38D9F588' }}>
+                    hungnoah730@gmail.com
+                  </a>
+                </>
+              )}
+            </div>
+          </div>
         </div>
 
         <TabBar tab={tab} setTab={setTab} hasCombos={combos.length > 0} />
@@ -772,9 +901,9 @@ export default function App() {
               <div style={{ width:36, height:4, background:'rgba(255,255,255,0.15)', borderRadius:2, margin:'0 auto 24px' }} />
               <div style={{ textAlign:'center', marginBottom:20 }}>
                 <div style={{ fontSize:36, marginBottom:14 }}>⚠️</div>
-                <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:9, color:'#FF5C7A',
+                <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:11, color:'#FF5C7A',
                   textShadow:'0 0 8px #FF5C7A', marginBottom:14, letterSpacing:1 }}>{t.deleteTitle}</div>
-                <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:7,
+                <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:9,
                   color:'rgba(255,255,255,0.4)', lineHeight:2, maxWidth:300, margin:'0 auto' }}>
                   {combos[confirmDelete]?.name && (
                     <span style={{ color:'#38D9F5', display:'block', marginBottom:10 }}>
@@ -786,23 +915,23 @@ export default function App() {
               </div>
               <div style={{ display:'flex', gap:10, marginTop:24 }}>
                 <button onClick={() => setConfirmDelete(null)} style={{
-                  flex:2, padding:'14px', borderRadius:4,
+                  flex:2, padding:'15px', borderRadius:4,
                   border:'1px solid rgba(56,217,245,0.25)', background:'rgba(56,217,245,0.06)',
-                  color:'#38D9F5', fontFamily:"'Press Start 2P', monospace", fontSize:8,
+                  color:'#38D9F5', fontFamily:"'Press Start 2P', monospace", fontSize:10,
                   cursor:'pointer', WebkitTapHighlightColor:'transparent',
                 }}>{t.btnDeleteCancel}</button>
                 <button onClick={() => { deleteCombo(confirmDelete); setConfirmDelete(null); }} style={{
-                  flex:1, padding:'14px', borderRadius:4,
+                  flex:1, padding:'15px', borderRadius:4,
                   border:'1px solid rgba(255,92,122,0.35)',
                   background:'rgba(255,92,122,0.15)', color:'#FF5C7A',
-                  fontFamily:"'Press Start 2P', monospace", fontSize:8,
+                  fontFamily:"'Press Start 2P', monospace", fontSize:10,
                   cursor:'pointer', WebkitTapHighlightColor:'transparent',
                   boxShadow:'0 0 12px rgba(255,92,122,0.2)',
                 }}>{t.btnDeleteConfirm}</button>
               </div>
             </div>
           </div>
-        )}}
+        )}
 
         {/* Add Combo Modal */}
         {showAdd && (
@@ -813,20 +942,20 @@ export default function App() {
               border:'1px solid rgba(56,217,245,0.15)', borderBottom:'none',
               padding:'28px 20px 40px', boxShadow:'0 -8px 40px rgba(56,217,245,0.1)' }}>
               <div style={{ width:36, height:4, background:'rgba(255,255,255,0.15)', borderRadius:2, margin:'0 auto 24px' }} />
-              <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:10, color:'#38D9F5', textShadow:'0 0 8px #38D9F5', marginBottom:6 }}>{t.modalTitle}</div>
-              <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:6, color:'rgba(255,255,255,0.3)', marginBottom:24, letterSpacing:1 }}>{t.modalSub}</div>
+              <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:12, color:'#38D9F5', textShadow:'0 0 8px #38D9F5', marginBottom:6 }}>{t.modalTitle}</div>
+              <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:8, color:'rgba(255,255,255,0.3)', marginBottom:24, letterSpacing:1 }}>{t.modalSub}</div>
 
               {formFields.map(field => (
                 <div key={field.key} style={{ marginBottom:16 }}>
-                  <label style={{ fontFamily:"'Press Start 2P', monospace", fontSize:7, color:'rgba(255,255,255,0.4)', display:'block', marginBottom:8, letterSpacing:1 }}>
+                  <label style={{ fontFamily:"'Press Start 2P', monospace", fontSize:9, color:'rgba(255,255,255,0.4)', display:'block', marginBottom:8, letterSpacing:1 }}>
                     {field.label}{field.required && <span style={{ color:'#FF3C50' }}> *</span>}
                   </label>
                   <input value={newCombo[field.key]}
                     onChange={e => setNewCombo(prev => ({ ...prev, [field.key]: e.target.value }))}
                     placeholder={field.placeholder}
-                    style={{ width:'100%', padding:'12px 14px', borderRadius:4,
+                    style={{ width:'100%', padding:'13px 14px', borderRadius:4,
                       background:'rgba(255,255,255,0.03)', border:'1px solid rgba(56,217,245,0.15)',
-                      color:'#F1F5F9', fontFamily:"'Press Start 2P', monospace", fontSize:9,
+                      color:'#F1F5F9', fontFamily:"'Press Start 2P', monospace", fontSize:10,
                       outline:'none', transition:'border-color 0.2s' }}
                     onFocus={e => e.currentTarget.style.borderColor = '#38D9F5'}
                     onBlur={e => e.currentTarget.style.borderColor = 'rgba(56,217,245,0.15)'}
@@ -836,16 +965,16 @@ export default function App() {
 
               <div style={{ display:'flex', gap:10, marginTop:24 }}>
                 <button onClick={() => setShowAdd(false)} style={{
-                  flex:1, padding:'14px', borderRadius:4, border:'1px solid rgba(255,255,255,0.08)',
+                  flex:1, padding:'15px', borderRadius:4, border:'1px solid rgba(255,255,255,0.08)',
                   background:'transparent', color:'rgba(255,255,255,0.4)',
-                  fontFamily:"'Press Start 2P', monospace", fontSize:8, cursor:'pointer',
+                  fontFamily:"'Press Start 2P', monospace", fontSize:9, cursor:'pointer',
                   WebkitTapHighlightColor:'transparent',
                 }}>{t.btnCancel}</button>
                 <button onClick={addCombo} disabled={!newCombo.name.trim()} style={{
-                  flex:2, padding:'14px', borderRadius:4, border:'none',
+                  flex:2, padding:'15px', borderRadius:4, border:'none',
                   background: newCombo.name.trim() ? 'linear-gradient(135deg, #38D9F5, #C97FFF)' : 'rgba(255,255,255,0.05)',
                   color: newCombo.name.trim() ? '#000' : 'rgba(255,255,255,0.2)',
-                  fontFamily:"'Press Start 2P', monospace", fontSize:8, fontWeight:700,
+                  fontFamily:"'Press Start 2P', monospace", fontSize:9, fontWeight:700,
                   cursor: newCombo.name.trim() ? 'pointer' : 'default',
                   letterSpacing:1, transition:'all 0.2s', WebkitTapHighlightColor:'transparent',
                 }}>{t.btnCreate}</button>
@@ -858,7 +987,7 @@ export default function App() {
           @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rajdhani:wght@700&family=Space+Mono&display=swap');
           * { margin:0; padding:0; box-sizing:border-box; }
           html, body { background:#080814; overscroll-behavior:none; }
-          input::placeholder { color:rgba(180,220,255,0.2); font-size:8px; }
+          input::placeholder { color:rgba(180,220,255,0.2); font-size:9px; }
           ::-webkit-scrollbar { width:2px; }
           ::-webkit-scrollbar-thumb { background:rgba(56,217,245,0.25); }
           @keyframes fadeInOut {
@@ -866,6 +995,10 @@ export default function App() {
             15%  { opacity:1; transform:translateX(-50%) translateY(0); }
             75%  { opacity:1; }
             100% { opacity:0; transform:translateX(-50%) translateY(-4px); }
+          }
+          @keyframes iconPulse {
+            0%, 100% { box-shadow: 0 0 50px rgba(56,217,245,0.45), 0 0 100px rgba(56,217,245,0.15); }
+            50%       { box-shadow: 0 0 70px rgba(56,217,245,0.65), 0 0 130px rgba(56,217,245,0.25); }
           }
         `}</style>
       </div>
