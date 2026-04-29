@@ -294,10 +294,16 @@ function FlashButton({ onClick, children, variant = 'win' }) {
 }
 
 // ── Finish Row ────────────────────────────────────────────────
-function FinishRow({ finishType: ft, stat, onRecord }) {
+function FinishRow({ finishType: ft, stat, onRecord, undoStack, onUndo, lastComboIdx }) {
   const t = useLang();
   const total = stat.wins + stat.losses;
   const rate = total > 0 ? (stat.wins / total * 100) : 0;
+  
+  // 檢查是否有符合這個完成方式的撤銷項目
+  const canUndoThisFinish = undoStack.length > 0 && 
+    undoStack[undoStack.length - 1].finishKey === ft.key &&
+    undoStack[undoStack.length - 1].idx === lastComboIdx;
+  
   return (
     <div style={{ marginBottom:12, padding:'14px 12px', background:`${ft.color}08`, border:`1px solid ${ft.color}22`, borderRadius:4 }}>
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10 }}>
@@ -315,9 +321,19 @@ function FinishRow({ finishType: ft, stat, onRecord }) {
       <div style={{ height:4, background:'rgba(255,255,255,0.05)', borderRadius:2, overflow:'hidden', marginBottom:10 }}>
         <div style={{ height:'100%', width:`${rate}%`, background:ft.color, boxShadow:`0 0 6px ${ft.color}`, borderRadius:2, transition:'width 0.4s ease' }} />
       </div>
-      <div style={{ display:'flex', gap:8 }}>
-        <FlashButton variant="win"  onClick={() => onRecord(ft.key, 'win')}>{t.btnWin}</FlashButton>
-        <FlashButton variant="loss" onClick={() => onRecord(ft.key, 'loss')}>{t.btnLoss}</FlashButton>
+      <div style={{ display:'flex', gap:8, flexDirection:'column' }}>
+        <div style={{ display:'flex', gap:8 }}>
+          <FlashButton variant="win"  onClick={() => onRecord(ft.key, 'win')}>{t.btnWin}</FlashButton>
+          <FlashButton variant="loss" onClick={() => onRecord(ft.key, 'loss')}>{t.btnLoss}</FlashButton>
+        </div>
+        {canUndoThisFinish && (
+          <button onClick={onUndo} style={{
+            width:'100%', padding:'10px', border:'1px solid #FFB34044',
+            background:'rgba(255,179,64,0.06)', color:'#FFB340',
+            fontFamily:"'Press Start 2P', monospace", fontSize:8, cursor:'pointer',
+            borderRadius:4, letterSpacing:1, WebkitTapHighlightColor:'transparent',
+          }}>{t.btnUndo}</button>
+        )}
       </div>
     </div>
   );
@@ -759,18 +775,9 @@ export default function App() {
 
         <HudPanel color="#FF5C7A" title={t.panelRecord} style={{ marginBottom:14 }}>
           {FINISH_TYPES.map(ft => (
-            <FinishRow key={ft.key} finishType={ft} stat={activeCombo.stats[ft.key]} onRecord={recordResult} />
+            <FinishRow key={ft.key} finishType={ft} stat={activeCombo.stats[ft.key]} onRecord={recordResult} undoStack={undoStack} onUndo={undo} lastComboIdx={activeIdx} />
           ))}
         </HudPanel>
-
-        {undoStack.length > 0 && (
-          <button onClick={undo} style={{
-            width:'100%', padding:'14px', border:'1px solid #FFB34044',
-            background:'rgba(255,179,64,0.06)', color:'#FFB340',
-            fontFamily:"'Press Start 2P', monospace", fontSize:10, cursor:'pointer',
-            borderRadius:4, letterSpacing:1, WebkitTapHighlightColor:'transparent',
-          }}>{t.btnUndo}</button>
-        )}
       </div>
     );
   };
