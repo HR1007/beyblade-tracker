@@ -507,11 +507,11 @@ function TabBar({ tab, setTab, hasCombos }) {
 function LangToggle({ lang, setLang }) {
   return (
     <button onClick={() => setLang(l => l === 'en' ? 'zh' : 'en')} style={{
-      padding:'0 12px', height:40, borderRadius:4,
+      padding:'0 9px', height:36, borderRadius:4,
       border:'1px solid rgba(56,217,245,0.2)',
       background:'rgba(56,217,245,0.05)',
       cursor:'pointer', WebkitTapHighlightColor:'transparent',
-      display:'flex', alignItems:'center', gap:6,
+      display:'flex', alignItems:'center', gap:5,
     }}>
       <span style={{ fontFamily:"'Press Start 2P', monospace", fontSize:8,
         color: lang === 'zh' ? '#38D9F5' : 'rgba(180,220,255,0.35)',
@@ -1001,45 +1001,48 @@ export default function App() {
         )}
 
         {/* Header */}
-        <header style={{ padding:'10px 16px', display:'flex', alignItems:'center', justifyContent:'space-between',
+        <header style={{ padding:'8px 12px', display:'flex', alignItems:'center', justifyContent:'space-between',
           borderBottom:'1px solid rgba(56,217,245,0.12)', background:'rgba(8,8,20,0.92)',
-          backdropFilter:'blur(20px)', WebkitBackdropFilter:'blur(20px)', position:'sticky', top:0, zIndex:100 }}>
-          <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-            <div style={{ width:46, height:46, borderRadius:8, overflow:'hidden', flexShrink:0,
+          backdropFilter:'blur(20px)', WebkitBackdropFilter:'blur(20px)', position:'sticky', top:0, zIndex:100,
+          gap:8 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:8, flex:1, minWidth:0, overflow:'hidden' }}>
+            <div style={{ width:40, height:40, borderRadius:8, overflow:'hidden', flexShrink:0,
               display:'flex', alignItems:'center', justifyContent:'center',
               background:'radial-gradient(circle, rgba(56,217,245,0.15) 0%, transparent 70%)',
               boxShadow:'0 0 20px rgba(56,217,245,0.35)' }}>
               <img src="/icon.png" alt="Bey Tracker" style={{
-                width:52, height:52, objectFit:'contain',
+                width:46, height:46, objectFit:'contain',
                 filter:'brightness(1.4) saturate(1.3) contrast(1.1) drop-shadow(0 0 6px rgba(56,217,245,0.7))',
                 mixBlendMode:'screen',
               }} />
             </div>
-            <div>
-              <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:12, color:'#38D9F5',
-                textShadow:'0 0 10px #38D9F5, 0 0 20px rgba(56,217,245,0.4)', letterSpacing:1 }}>BEY TRACKER</div>
-              <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:7, color:'rgba(200,230,255,0.35)', letterSpacing:1, marginTop:4 }}>{t.appSubtitle}</div>
+            <div style={{ minWidth:0, overflow:'hidden' }}>
+              <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:11, color:'#38D9F5',
+                textShadow:'0 0 10px #38D9F5, 0 0 20px rgba(56,217,245,0.4)', letterSpacing:1,
+                whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>BEY TRACKER</div>
+              <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:6, color:'rgba(200,230,255,0.35)', letterSpacing:1, marginTop:4,
+                whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{t.appSubtitle}</div>
             </div>
           </div>
-          <div style={{ display:'flex', gap:6 }}>
+          <div style={{ display:'flex', gap:4, flexShrink:0 }}>
             <LangToggle lang={lang} setLang={setLang} />
             <button onClick={openBgModal} title={t.bgTitle} style={{
-              width:40, height:40, borderRadius:4, border: bgImage ? '1px solid rgba(201,127,255,0.4)' : '1px solid rgba(56,217,245,0.15)',
+              width:36, height:36, borderRadius:4, border: bgImage ? '1px solid rgba(201,127,255,0.4)' : '1px solid rgba(56,217,245,0.15)',
               background: bgImage ? 'rgba(201,127,255,0.1)' : 'rgba(56,217,245,0.05)',
               color: bgImage ? '#C97FFF' : 'rgba(200,235,255,0.55)',
-              fontSize:18, cursor:'pointer', lineHeight:1,
+              fontSize:16, cursor:'pointer', lineHeight:1,
               WebkitTapHighlightColor:'transparent',
             }}>🎨</button>
             <button onClick={() => setShowHelp(true)} style={{
-              width:40, height:40, borderRadius:4, border:'1px solid rgba(56,217,245,0.15)',
+              width:36, height:36, borderRadius:4, border:'1px solid rgba(56,217,245,0.15)',
               background:'rgba(56,217,245,0.05)', color:'rgba(200,235,255,0.55)',
-              fontFamily:"'Press Start 2P', monospace", fontSize:12, cursor:'pointer',
+              fontFamily:"'Press Start 2P', monospace", fontSize:11, cursor:'pointer',
               WebkitTapHighlightColor:'transparent',
             }}>?</button>
             <button onClick={() => setShowAdd(true)} style={{
-              padding:'10px 14px', borderRadius:4, border:'1px solid rgba(56,217,245,0.35)',
+              padding:'9px 10px', borderRadius:4, border:'1px solid rgba(56,217,245,0.35)',
               background:'rgba(56,217,245,0.1)', color:'#38D9F5',
-              fontFamily:"'Press Start 2P', monospace", fontSize:8, cursor:'pointer',
+              fontFamily:"'Press Start 2P', monospace", fontSize:7, cursor:'pointer',
               letterSpacing:0.5, textShadow:'0 0 8px #38D9F5',
               boxShadow:'0 0 14px rgba(56,217,245,0.2)', WebkitTapHighlightColor:'transparent',
             }}>{t.btnNew}</button>
