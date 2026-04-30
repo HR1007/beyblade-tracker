@@ -141,6 +141,13 @@ const TRANSLATIONS = {
 const LangCtx = createContext(TRANSLATIONS.en);
 const useLang = () => useContext(LangCtx);
 
+// ── Changelog (newest first) ─────────────────────────────────
+// 每次更新只需在最前面加一筆，id 必須唯一且遞增
+const CHANGELOG = [
+  { id: 'v1.5', en: '🎨 NEW: Customize your app background — tap 🎨 in the header!', zh: '🎨 新功能：自定義 App 背景！點擊標題列的 🎨 按鈕即可上傳圖片' },
+  { id: 'v1.4', en: '↩ Undo is here — reverse your last battle record anytime in the BATTLE tab', zh: '↩ 撤銷功能上線！可在對戰頁籤隨時取消上一筆記錄' },
+];
+
 // ── Data ──────────────────────────────────────────────────────
 const FINISH_TYPES = [
   { key: 'spin',   labelKey: 'spinFinish',   points: 1, color: '#38D9F5', icon: '🌀', desc: '1 PT' },
@@ -541,6 +548,9 @@ export default function App() {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [editComboIdx, setEditComboIdx] = useState(null);
   const [editForm, setEditForm] = useState({ name:'', blade:'', ratchet:'', bit:'' });
+  const [showTicker, setShowTicker] = useState(() => localStorage.getItem('bey-ticker-seen') !== CHANGELOG[0].id);
+  const dismissTicker = () => { localStorage.setItem('bey-ticker-seen', CHANGELOG[0].id); setShowTicker(false); };
+
   const [bgImage, setBgImage] = useState(() => localStorage.getItem('bey-bg-image') || null);
   const [bgOverlay, setBgOverlay] = useState(() => parseFloat(localStorage.getItem('bey-bg-overlay') ?? '0.82'));
   const [showBgModal, setShowBgModal] = useState(false);
@@ -1049,6 +1059,43 @@ export default function App() {
           </div>
         </header>
 
+        {/* ── Ticker Banner ── */}
+        {showTicker && (
+          <div style={{
+            position:'sticky', top:56, zIndex:99,
+            display:'flex', alignItems:'center',
+            background:'rgba(0,255,100,0.07)', borderBottom:'1px solid rgba(0,255,100,0.2)',
+            backdropFilter:'blur(10px)', WebkitBackdropFilter:'blur(10px)',
+            overflow:'hidden', height:32,
+          }}>
+            {/* scrolling track */}
+            <div style={{ flex:1, overflow:'hidden', position:'relative', height:'100%' }}>
+              <div style={{
+                display:'inline-flex', alignItems:'center', height:'100%',
+                whiteSpace:'nowrap',
+                animation:'tickerScroll 28s linear infinite',
+              }}>
+                {[...CHANGELOG, ...CHANGELOG].map((item, i) => (
+                  <span key={i} style={{
+                    fontFamily:"'Press Start 2P', monospace", fontSize:7,
+                    color:'#00FF64', textShadow:'0 0 8px rgba(0,255,100,0.6)',
+                    paddingRight:80,
+                  }}>
+                    {lang === 'zh' ? item.zh : item.en}
+                  </span>
+                ))}
+              </div>
+            </div>
+            {/* close button */}
+            <button onClick={dismissTicker} style={{
+              flexShrink:0, width:32, height:32, border:'none',
+              background:'transparent', color:'rgba(0,255,100,0.5)',
+              fontSize:14, cursor:'pointer', lineHeight:1,
+              WebkitTapHighlightColor:'transparent',
+            }}>✕</button>
+          </div>
+        )}
+
         {/* Content */}
         <div style={{ maxWidth:600, margin:'0 auto' }}>
           {tab === 'combos' && renderCombosPanel()}
@@ -1349,6 +1396,10 @@ export default function App() {
           @keyframes iconPulse {
             0%, 100% { box-shadow: 0 0 50px rgba(56,217,245,0.45), 0 0 100px rgba(56,217,245,0.15); }
             50%       { box-shadow: 0 0 70px rgba(56,217,245,0.65), 0 0 130px rgba(56,217,245,0.25); }
+          }
+          @keyframes tickerScroll {
+            0%   { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
           }
         `}</style>
       </div>
