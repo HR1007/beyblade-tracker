@@ -33,6 +33,14 @@ const TRANSLATIONS = {
     burstFinish: 'BURST FINISH', xtremeFinish: 'XTREME FINISH',
     panelPerf: 'BATTLE PERFORMANCE',
     panelGlossary: 'STAT GLOSSARY',
+    bgTitle: 'CUSTOM BACKGROUND',
+    bgChoose: 'CHOOSE IMAGE',
+    bgReset: 'RESET',
+    bgApply: 'APPLY ✓',
+    bgSizeError: 'FILE TOO LARGE (MAX 5MB)',
+    bgTypeError: 'IMAGES ONLY (JPG/PNG/GIF/WEBP)',
+    bgOverlay: 'DARK OVERLAY',
+    bgNoFile: 'NO IMAGE SELECTED',
     perfLabel: 'NET/BTL RATING',
     perfDominantTitle: 'DOMINANT',
     perfDominantDesc: 'This combo has overwhelming control. It is your primary point scorer — keep it in your main rotation.',
@@ -92,6 +100,14 @@ const TRANSLATIONS = {
     burstFinish: '爆裂勝利', xtremeFinish: '極限勝利',
     panelPerf: '戰鬥表現評價',
     panelGlossary: '數據名詞解釋',
+    bgTitle: '自定義背景',
+    bgChoose: '選擇圖片',
+    bgReset: '重置',
+    bgApply: '套用 ✓',
+    bgSizeError: '檔案過大（上限 5MB）',
+    bgTypeError: '請選擇圖片檔案（JPG/PNG/GIF/WEBP）',
+    bgOverlay: '暗色遮罩',
+    bgNoFile: '未選擇圖片',
     perfLabel: '每場淨得分評級',
     perfDominantTitle: '強力壓制',
     perfDominantDesc: '該陀螺具有強大的壓制力，是您的主力得分手。建議在重要對局中優先使用此組合。',
@@ -525,11 +541,45 @@ export default function App() {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [editComboIdx, setEditComboIdx] = useState(null);
   const [editForm, setEditForm] = useState({ name:'', blade:'', ratchet:'', bit:'' });
+  const [bgImage, setBgImage] = useState(() => localStorage.getItem('bey-bg-image') || null);
+  const [bgOverlay, setBgOverlay] = useState(() => parseFloat(localStorage.getItem('bey-bg-overlay') ?? '0.82'));
+  const [showBgModal, setShowBgModal] = useState(false);
+  const [bgPendingFile, setBgPendingFile] = useState(null);
+  const [bgPendingUrl, setBgPendingUrl] = useState(null);
+  const [bgPendingOverlay, setBgPendingOverlay] = useState(0.82);
+  const [bgFileError, setBgFileError] = useState(null);
   const notifTimer = useRef(null);
 
   const t = TRANSLATIONS[lang];
 
   useEffect(() => { localStorage.setItem('bey-lang', lang); }, [lang]);
+  useEffect(() => {
+    if (bgImage) localStorage.setItem('bey-bg-image', bgImage);
+    else localStorage.removeItem('bey-bg-image');
+  }, [bgImage]);
+  useEffect(() => { localStorage.setItem('bey-bg-overlay', String(bgOverlay)); }, [bgOverlay]);
+
+  const openBgModal = () => {
+    setBgPendingUrl(bgImage);
+    setBgPendingFile(null);
+    setBgPendingOverlay(bgOverlay);
+    setBgFileError(null);
+    setShowBgModal(true);
+  };
+  const closeBgModal = () => { setShowBgModal(false); setBgPendingUrl(null); setBgPendingFile(null); setBgFileError(null); };
+  const applyBg = () => { setBgImage(bgPendingUrl); setBgOverlay(bgPendingOverlay); closeBgModal(); };
+  const resetBg = () => { setBgPendingUrl(null); setBgPendingFile(null); setBgFileError(null); };
+  const handleBgFile = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { setBgFileError(t.bgTypeError); return; }
+    if (file.size > 5 * 1024 * 1024) { setBgFileError(t.bgSizeError); return; }
+    setBgFileError(null);
+    setBgPendingFile(file);
+    const reader = new FileReader();
+    reader.onload = (ev) => setBgPendingUrl(ev.target.result);
+    reader.readAsDataURL(file);
+  };
 
   useEffect(() => {
     const startTime = Date.now();
@@ -927,7 +977,12 @@ export default function App() {
       {showLoading && <LoadingScreen progress={loadingProgress} />}
       <div style={{
         minHeight:'100vh', width:'100%', background:'#080814',
-        backgroundImage:'radial-gradient(ellipse at 20% 10%, rgba(56,217,245,0.07) 0%, transparent 55%), radial-gradient(ellipse at 80% 90%, rgba(201,127,255,0.07) 0%, transparent 55%), radial-gradient(ellipse at 50% 50%, rgba(30,30,80,0.5) 0%, transparent 70%)',
+        backgroundImage: bgImage
+          ? `radial-gradient(ellipse at 50% 50%, rgba(0,0,0,${bgOverlay}) 0%, rgba(0,0,0,${bgOverlay}) 100%), url(${bgImage})`
+          : 'radial-gradient(ellipse at 20% 10%, rgba(56,217,245,0.07) 0%, transparent 55%), radial-gradient(ellipse at 80% 90%, rgba(201,127,255,0.07) 0%, transparent 55%), radial-gradient(ellipse at 50% 50%, rgba(30,30,80,0.5) 0%, transparent 70%)',
+        backgroundSize: bgImage ? 'cover' : 'auto',
+        backgroundPosition: bgImage ? 'center' : 'initial',
+        backgroundAttachment: bgImage ? 'fixed' : 'initial',
         color:'#E8F4FF', paddingBottom:76, overflowX:'hidden',
       }}>
         {/* Scanline */}
@@ -968,6 +1023,13 @@ export default function App() {
           </div>
           <div style={{ display:'flex', gap:6 }}>
             <LangToggle lang={lang} setLang={setLang} />
+            <button onClick={openBgModal} title={t.bgTitle} style={{
+              width:40, height:40, borderRadius:4, border: bgImage ? '1px solid rgba(201,127,255,0.4)' : '1px solid rgba(56,217,245,0.15)',
+              background: bgImage ? 'rgba(201,127,255,0.1)' : 'rgba(56,217,245,0.05)',
+              color: bgImage ? '#C97FFF' : 'rgba(200,235,255,0.55)',
+              fontSize:18, cursor:'pointer', lineHeight:1,
+              WebkitTapHighlightColor:'transparent',
+            }}>🎨</button>
             <button onClick={() => setShowHelp(true)} style={{
               width:40, height:40, borderRadius:4, border:'1px solid rgba(56,217,245,0.15)',
               background:'rgba(56,217,245,0.05)', color:'rgba(200,235,255,0.55)',
@@ -1161,6 +1223,108 @@ export default function App() {
                   cursor: newCombo.name.trim() ? 'pointer' : 'default',
                   letterSpacing:1, transition:'all 0.2s', WebkitTapHighlightColor:'transparent',
                 }}>{t.btnCreate}</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ═══ CUSTOM BACKGROUND MODAL ═══ */}
+        {showBgModal && (
+          <div style={{ position:'fixed', inset:0, zIndex:700, display:'flex', alignItems:'flex-end', justifyContent:'center' }}>
+            <div onClick={closeBgModal} style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.85)', backdropFilter:'blur(8px)', WebkitBackdropFilter:'blur(8px)' }} />
+            <div style={{ position:'relative', zIndex:1, width:'100%', maxWidth:480,
+              background:'#07070c', borderRadius:'12px 12px 0 0',
+              border:'1px solid rgba(201,127,255,0.25)', borderBottom:'none',
+              padding:'28px 20px 40px', boxShadow:'0 -8px 40px rgba(201,127,255,0.12)' }}>
+              <div style={{ width:36, height:4, background:'rgba(255,255,255,0.15)', borderRadius:2, margin:'0 auto 24px' }} />
+              <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:11, color:'#C97FFF', textShadow:'0 0 8px #C97FFF', marginBottom:24 }}>{t.bgTitle}</div>
+
+              {/* Preview */}
+              <div style={{
+                width:'100%', height:160, borderRadius:6, overflow:'hidden', marginBottom:16,
+                border:'1px solid rgba(201,127,255,0.2)', position:'relative',
+                background:'#0a0a14',
+              }}>
+                {bgPendingUrl ? (
+                  <>
+                    <img src={bgPendingUrl} alt="preview" style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />
+                    <div style={{
+                      position:'absolute', inset:0,
+                      background:`rgba(0,0,0,${bgPendingOverlay})`,
+                    }} />
+                    <div style={{ position:'absolute', bottom:8, left:0, right:0, textAlign:'center',
+                      fontFamily:"'Press Start 2P', monospace", fontSize:7, color:'rgba(255,255,255,0.5)', letterSpacing:1 }}>
+                      PREVIEW
+                    </div>
+                  </>
+                ) : (
+                  <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100%',
+                    fontFamily:"'Press Start 2P', monospace", fontSize:8, color:'rgba(255,255,255,0.2)' }}>
+                    {t.bgNoFile}
+                  </div>
+                )}
+              </div>
+
+              {/* File picker */}
+              <label style={{
+                display:'block', width:'100%', padding:'12px', borderRadius:4, marginBottom:12,
+                border:'1px dashed rgba(201,127,255,0.35)', background:'rgba(201,127,255,0.05)',
+                fontFamily:"'Press Start 2P', monospace", fontSize:8, color:'#C97FFF',
+                cursor:'pointer', textAlign:'center', letterSpacing:0.5,
+              }}>
+                {t.bgChoose}
+                <input type="file" accept="image/jpeg,image/png,image/gif,image/webp" onChange={handleBgFile}
+                  style={{ display:'none' }} />
+              </label>
+
+              {/* File error */}
+              {bgFileError && (
+                <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:7, color:'#FF5C7A',
+                  marginBottom:10, lineHeight:1.8 }}>{bgFileError}</div>
+              )}
+
+              {/* File info */}
+              {bgPendingFile && !bgFileError && (
+                <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:7, color:'rgba(255,255,255,0.3)',
+                  marginBottom:10, lineHeight:1.8 }}>
+                  {bgPendingFile.name} · {(bgPendingFile.size / 1024).toFixed(0)} KB
+                </div>
+              )}
+
+              {/* Overlay slider */}
+              <div style={{ marginBottom:20 }}>
+                <div style={{ display:'flex', justifyContent:'space-between', marginBottom:8 }}>
+                  <span style={{ fontFamily:"'Press Start 2P', monospace", fontSize:7, color:'rgba(255,255,255,0.4)' }}>{t.bgOverlay}</span>
+                  <span style={{ fontFamily:"'Press Start 2P', monospace", fontSize:7, color:'#C97FFF' }}>{Math.round(bgPendingOverlay * 100)}%</span>
+                </div>
+                <input type="range" min="0" max="0.97" step="0.01"
+                  value={bgPendingOverlay}
+                  onChange={e => setBgPendingOverlay(parseFloat(e.target.value))}
+                  style={{ width:'100%', accentColor:'#C97FFF', cursor:'pointer' }} />
+              </div>
+
+              {/* Buttons */}
+              <div style={{ display:'flex', gap:10 }}>
+                <button onClick={resetBg} style={{
+                  flex:1, padding:'13px', borderRadius:4,
+                  border:'1px solid rgba(255,92,122,0.3)', background:'rgba(255,92,122,0.06)',
+                  color:'#FF5C7A', fontFamily:"'Press Start 2P', monospace", fontSize:8,
+                  cursor:'pointer', WebkitTapHighlightColor:'transparent',
+                }}>{t.bgReset}</button>
+                <button onClick={closeBgModal} style={{
+                  flex:1, padding:'13px', borderRadius:4,
+                  border:'1px solid rgba(255,255,255,0.08)', background:'transparent',
+                  color:'rgba(255,255,255,0.4)', fontFamily:"'Press Start 2P', monospace", fontSize:8,
+                  cursor:'pointer', WebkitTapHighlightColor:'transparent',
+                }}>{t.btnCancel}</button>
+                <button onClick={applyBg} disabled={!bgPendingUrl} style={{
+                  flex:2, padding:'13px', borderRadius:4, border:'none',
+                  background: bgPendingUrl ? 'linear-gradient(135deg, #C97FFF, #38D9F5)' : 'rgba(255,255,255,0.05)',
+                  color: bgPendingUrl ? '#000' : 'rgba(255,255,255,0.2)',
+                  fontFamily:"'Press Start 2P', monospace", fontSize:8, fontWeight:700,
+                  cursor: bgPendingUrl ? 'pointer' : 'default',
+                  WebkitTapHighlightColor:'transparent',
+                }}>{t.bgApply}</button>
               </div>
             </div>
           </div>
