@@ -24,6 +24,7 @@ const TRANSLATIONS = {
     deleteTitle: 'DELETE COMBO?',
     deleteMsg: 'All battle records for this combo will be permanently lost.',
     btnDeleteConfirm: '🗑 DELETE', btnDeleteCancel: 'KEEP IT',
+    searchPlaceholder: 'SEARCH COMBOS...', searchNoResult: 'NO MATCHES FOUND',
     btnCopy: 'COPY', btnEdit: 'EDIT', btnShare: 'SHARE', btnExportCSV: 'CSV',
     modalEditTitle: 'EDIT COMBO', btnSave: 'SAVE ✓',
     notifWin: 'WIN!', notifLoss: 'LOSS', notifUndo: 'UNDONE', notifCopy: 'COPIED!', notifSaved: 'SAVED!', notifShared: 'COPIED!', notifExported: 'EXPORTED!',
@@ -91,6 +92,7 @@ const TRANSLATIONS = {
     deleteTitle: '確定刪除組合？',
     deleteMsg: '這個組合的所有對戰紀錄將永久消失。',
     btnDeleteConfirm: '🗑 刪除', btnDeleteCancel: '保留',
+    searchPlaceholder: '搜尋組合...', searchNoResult: '找不到符合的組合',
     btnCopy: '複製', btnEdit: '編輯', btnShare: '分享', btnExportCSV: 'CSV',
     modalEditTitle: '編輯組合', btnSave: '儲存 ✓',
     notifWin: '勝利！', notifLoss: '落敗', notifUndo: '已撤銷', notifCopy: '已複製！', notifSaved: '已儲存！', notifShared: '已複製！', notifExported: '已匯出！',
@@ -548,6 +550,7 @@ export default function App() {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [editComboIdx, setEditComboIdx] = useState(null);
   const [editForm, setEditForm] = useState({ name:'', blade:'', ratchet:'', bit:'' });
+  const [searchQuery, setSearchQuery] = useState('');
   const [showTicker, setShowTicker] = useState(() => localStorage.getItem('bey-ticker-seen') !== CHANGELOG[0].id);
   const dismissTicker = () => { localStorage.setItem('bey-ticker-seen', CHANGELOG[0].id); setShowTicker(false); };
 
@@ -761,9 +764,47 @@ export default function App() {
     return calcStats(merged);
   })();
 
-  const renderCombosPanel = () => (
+  const renderCombosPanel = () => {
+    const q = searchQuery.trim().toLowerCase();
+    const filtered = q
+      ? combos.map((c, i) => ({ c, i })).filter(({ c }) =>
+          [c.name, c.blade, c.ratchet, c.bit].some(v => v && v.toLowerCase().includes(q))
+        )
+      : combos.map((c, i) => ({ c, i }));
+
+    return (
     <div style={{ padding:'16px 14px' }}>
       <HudPanel color="#38D9F5" title={t.panelRoster} style={{ marginBottom:14 }}>
+
+        {/* Search bar */}
+        {combos.length > 0 && (
+          <div style={{ position:'relative', marginBottom:12 }}>
+            <span style={{ position:'absolute', left:11, top:'50%', transform:'translateY(-50%)',
+              fontSize:14, pointerEvents:'none', opacity:0.4 }}>🔍</span>
+            <input
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder={t.searchPlaceholder}
+              style={{
+                width:'100%', padding:'10px 36px 10px 32px', borderRadius:4,
+                background:'rgba(56,217,245,0.04)', border:'1px solid rgba(56,217,245,0.18)',
+                color:'#E8F4FF', fontFamily:"'Press Start 2P', monospace", fontSize:8,
+                outline:'none', transition:'border-color 0.2s',
+              }}
+              onFocus={e => e.currentTarget.style.borderColor = '#38D9F5'}
+              onBlur={e => e.currentTarget.style.borderColor = 'rgba(56,217,245,0.18)'}
+            />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery('')} style={{
+                position:'absolute', right:8, top:'50%', transform:'translateY(-50%)',
+                background:'transparent', border:'none', color:'rgba(56,217,245,0.5)',
+                fontSize:14, cursor:'pointer', lineHeight:1, padding:'2px 4px',
+                WebkitTapHighlightColor:'transparent',
+              }}>✕</button>
+            )}
+          </div>
+        )}
+
         {combos.length === 0 ? (
           <div style={{ textAlign:'center', padding:'32px 0' }}>
             <div style={{ fontSize:48, marginBottom:16 }}>⚡</div>
@@ -771,9 +812,16 @@ export default function App() {
               {t.noCombos[0]}<br/>{t.noCombos[1]}
             </div>
           </div>
+        ) : filtered.length === 0 ? (
+          <div style={{ textAlign:'center', padding:'24px 0' }}>
+            <div style={{ fontSize:36, marginBottom:12 }}>🔍</div>
+            <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:9, color:'rgba(255,255,255,0.35)', lineHeight:2 }}>
+              {t.searchNoResult}
+            </div>
+          </div>
         ) : (
           <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
-            {combos.map((c,i) => (
+            {filtered.map(({ c, i }) => (
               <ComboCard key={c.id} combo={c} isActive={i === activeIdx}
                 onSelect={() => { setActiveIdx(i); setTab('battle'); }}
                 onDelete={() => setConfirmDelete(i)}
@@ -806,7 +854,8 @@ export default function App() {
         </HudPanel>
       )}
     </div>
-  );
+    );
+  };
 
   const renderBattlePanel = () => {
     if (!activeCombo) return (
