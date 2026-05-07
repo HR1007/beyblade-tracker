@@ -20,6 +20,11 @@ const TRANSLATIONS = {
     fieldName: 'COMBO NAME', fieldBlade: 'BLADE', fieldRatchet: 'RATCHET', fieldBit: 'BIT',
     placeholderName: 'e.g. Dran Sword 3-60F', placeholderBlade: 'e.g. Dran Sword',
     placeholderRatchet: 'e.g. 3-60', placeholderBit: 'e.g. Flat',
+    fieldSeries: 'SERIES', selectPart: '— SELECT —',
+    seriesBX: 'BX', seriesUX: 'UX', seriesCX: 'CX (CUSTOM)',
+    fieldLock: 'LOCK CHIP', fieldMainBlade: 'MAIN BLADE', fieldAssistBlade: 'ASSIST BLADE',
+    panelOpponent: 'OPPONENT COMBO', oppOptional: '(OPTIONAL)',
+    panelHistory: 'BATTLE HISTORY', historyEmpty: 'NO BATTLES RECORDED YET',
     btnCancel: 'CANCEL', btnCreate: 'CREATE ⚡',
     deleteTitle: 'DELETE COMBO?',
     deleteMsg: 'All battle records for this combo will be permanently lost.',
@@ -84,10 +89,15 @@ const TRANSLATIONS = {
     formulas: '計算公式',
     gained: '獲得', lost: '失去', totalPlus: '總得分', totalMinus: '總失分',
     unnamed: '未命名', btls: '場', avg: '平均',
-    modalTitle: '新增組合', modalSub: '刀刃 · 棘輪 · 尖端',
-    fieldName: '組合名稱', fieldBlade: '刀刃', fieldRatchet: '棘輪', fieldBit: '尖端',
+    modalTitle: '新增組合', modalSub: '刀刃 · 棘輪 · 軸心',
+    fieldName: '組合名稱', fieldBlade: '刀刃', fieldRatchet: '棘輪', fieldBit: '軸心',
     placeholderName: '例：Dran Sword 3-60F', placeholderBlade: '例：Dran Sword',
     placeholderRatchet: '例：3-60', placeholderBit: '例：Flat',
+    fieldSeries: '系列', selectPart: '— 請選擇 —',
+    seriesBX: 'BX 基礎款', seriesUX: 'UX 超越款', seriesCX: 'CX 自訂款',
+    fieldLock: '固鎖', fieldMainBlade: '主要戰刃', fieldAssistBlade: '輔助戰刃',
+    panelOpponent: '對手組合', oppOptional: '（選填）',
+    panelHistory: '對戰歷史', historyEmpty: '尚無對戰紀錄',
     btnCancel: '取消', btnCreate: '建立 ⚡',
     deleteTitle: '確定刪除組合？',
     deleteMsg: '這個組合的所有對戰紀錄將永久消失。',
@@ -149,6 +159,39 @@ const CHANGELOG = [
   { id: 'v1.5', en: '🎨 NEW: Customize your app background — tap 🎨 in the header!', zh: '🎨 新功能：自定義 App 背景！點擊標題列的 🎨 按鈕即可上傳圖片' },
   { id: 'v1.4', en: '↩ Undo is here — reverse your last battle record anytime in the BATTLE tab', zh: '↩ 撤銷功能上線！可在對戰頁籤隨時取消上一筆記錄' },
 ];
+
+// ── Parts Database ────────────────────────────────────────────
+const BLADES = [
+  'Aero Pegasus','Bear Scratch','Black Shell','Cobalt Dragoon','Cobalt Drake',
+  'Crimson Garuda','Croco Crunch','Draciel Shield','Dragoon Storm','Dran Buster',
+  'Dran Dagger','Dran Sword','Dranzer Spiral','Driger Slash','Ghost Circle',
+  'Golem Rock','Hells Chain','Hells Hammer','Hells Scythe','Impact Drake',
+  'Knight Lance','Knight Mail','Knight Shield','Leon Claw','Leon Crest',
+  'Lightning L-Drago Rapid','Lightning L-Drago Upper','Mammoth Tusk',
+  'Phoenix Feather','Phoenix Rudder','Phoenix Wing','Ptera Swing','Rhino Horn',
+  'Roar Tyranno','Samurai Saber','Samurai Steel','Scorpio Spear','Shark Edge',
+  'Shelter Drake','Shinobi Knife','Shinobi Shadow','Silver Wolf','Sphinx Cowl',
+  'Storm Pegasis','Tricera Press','Tyranno Beat','Unicorn Sting','Victory Valkyrie',
+  'Viper Tail','Weiss Tiger','Whale Wave','Wizard Arrow','Wizard Rod',
+  'Wyvern Gale','Xeno Xcalibur','Yell Kong',
+];
+const RATCHETS = [
+  '0-70','0-80','1-60','1-80','2-60','2-70','2-80',
+  '3-60','3-70','3-80','3-85','4-55','4-60','4-70','4-80',
+  '5-60','5-70','5-80','6-60','6-80','7-60','7-70','7-80',
+  '9-60','9-70','9-80','M-85',
+];
+const BITS = [
+  'Accel','Ball','Bound Spike','Cyclone','Disc Ball','Dot','Elevate',
+  'Flat','Free Ball','Gear Ball','Gear Flat','Gear Needle','Gear Point',
+  'Gear Rush','Glide','Hexa','High Needle','High Taper','Kick','Level',
+  'Low Flat','Low Orb','Low Rush','Metal Needle','Needle','Orb','Point',
+  'Quake','Rubber Accel','Rush','Spike','Taper','Trans Point','Under Needle',
+  'Unite','Vortex','Wedge','Zap',
+];
+const CX_LOCK_CHIPS   = ['Dran','Fox','Hells','Perseus','Rhino','Wizard'];
+const CX_MAIN_BLADES  = ['Arc','Brave','Brush','Dark','Reaper'];
+const CX_ASSIST_BLADES= ['Bumper','Charge','Jaggy','Round','Slash','Turn'];
 
 // ── Data ──────────────────────────────────────────────────────
 const FINISH_TYPES = [
@@ -364,6 +407,50 @@ function FinishRow({ finishType: ft, stat, onRecord, undoStack, onUndo, lastComb
   );
 }
 
+// ── Part Select ───────────────────────────────────────────────
+function PartSelect({ value, onChange, options, placeholder, accentColor = '#38D9F5' }) {
+  return (
+    <div style={{ position:'relative' }}>
+      <select value={value} onChange={e => onChange(e.target.value)} style={{
+        width:'100%', padding:'11px 32px 11px 12px', borderRadius:4,
+        background:'rgba(255,255,255,0.03)', border:`1px solid ${accentColor}33`,
+        color: value ? '#F1F5F9' : 'rgba(180,220,255,0.25)',
+        fontFamily:"'Press Start 2P', monospace", fontSize:8,
+        outline:'none', cursor:'pointer', appearance:'none', WebkitAppearance:'none',
+        transition:'border-color 0.2s',
+      }}
+        onFocus={e => e.currentTarget.style.borderColor = accentColor}
+        onBlur={e => e.currentTarget.style.borderColor = `${accentColor}33`}
+      >
+        <option value="">{placeholder}</option>
+        {options.map(o => <option key={o} value={o}>{o}</option>)}
+      </select>
+      <span style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)',
+        pointerEvents:'none', color:accentColor, fontSize:8, opacity:0.5 }}>▼</span>
+    </div>
+  );
+}
+
+// ── Parts display helper ──────────────────────────────────────
+function ComboParts({ combo }) {
+  const isCX = combo.seriesType === 'CX';
+  return (
+    <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
+      {isCX ? (
+        <>
+          {combo.lockChip   && <span style={{ fontFamily:"'Press Start 2P',monospace", fontSize:8, padding:'5px 9px', background:'rgba(255,92,122,0.08)',  border:'1px solid #FF5C7A33', color:'#FF5C7A',  borderRadius:2 }}>{combo.lockChip}</span>}
+          {combo.mainBlade  && <span style={{ fontFamily:"'Press Start 2P',monospace", fontSize:8, padding:'5px 9px', background:'rgba(56,217,245,0.08)',   border:'1px solid #38D9F533', color:'#38D9F5',  borderRadius:2 }}>{combo.mainBlade}</span>}
+          {combo.assistBlade && <span style={{ fontFamily:"'Press Start 2P',monospace", fontSize:8, padding:'5px 9px', background:'rgba(0,255,100,0.08)',   border:'1px solid #00FF6433', color:'#00FF64',  borderRadius:2 }}>{combo.assistBlade}</span>}
+        </>
+      ) : (
+        combo.blade && <span style={{ fontFamily:"'Press Start 2P',monospace", fontSize:8, padding:'5px 9px', background:'rgba(56,217,245,0.08)', border:'1px solid #38D9F533', color:'#38D9F5', borderRadius:2 }}>{combo.blade}</span>
+      )}
+      {combo.ratchet && <span style={{ fontFamily:"'Press Start 2P',monospace", fontSize:8, padding:'5px 9px', background:'rgba(255,179,64,0.08)',  border:'1px solid #FFB34033', color:'#FFB340', borderRadius:2 }}>{combo.ratchet}</span>}
+      {combo.bit     && <span style={{ fontFamily:"'Press Start 2P',monospace", fontSize:8, padding:'5px 9px', background:'rgba(201,127,255,0.08)', border:'1px solid #C97FFF33', color:'#C97FFF', borderRadius:2 }}>{combo.bit}</span>}
+    </div>
+  );
+}
+
 // ── Combo Card ────────────────────────────────────────────────
 function ComboCard({ combo, isActive, onSelect, onDelete, onCopy, onEdit, onShare, onExport }) {
   const t = useLang();
@@ -538,7 +625,7 @@ export default function App() {
   const [combos, setCombos] = useState([]);
   const [activeIdx, setActiveIdx] = useState(0);
   const [showAdd, setShowAdd] = useState(false);
-  const [newCombo, setNewCombo] = useState({ name:'', blade:'', ratchet:'', bit:'' });
+  const [newCombo, setNewCombo] = useState({ name:'', seriesType:'BX', blade:'', ratchet:'', bit:'', lockChip:'', mainBlade:'', assistBlade:'' });
   const [loaded, setLoaded] = useState(false);
   const [undoStack, setUndoStack] = useState([]);
   const [tab, setTab] = useState('combos');
@@ -549,7 +636,8 @@ export default function App() {
   const [showLoading, setShowLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [editComboIdx, setEditComboIdx] = useState(null);
-  const [editForm, setEditForm] = useState({ name:'', blade:'', ratchet:'', bit:'' });
+  const [editForm, setEditForm] = useState({ name:'', seriesType:'BX', blade:'', ratchet:'', bit:'', lockChip:'', mainBlade:'', assistBlade:'' });
+  const [opponent, setOpponent] = useState({ blade:'', ratchet:'', bit:'' });
   const [searchQuery, setSearchQuery] = useState('');
   const [showTicker, setShowTicker] = useState(() => localStorage.getItem('bey-ticker-seen') !== CHANGELOG[0].id);
   const dismissTicker = () => { localStorage.setItem('bey-ticker-seen', CHANGELOG[0].id); setShowTicker(false); };
@@ -627,11 +715,11 @@ export default function App() {
 
   const addCombo = () => {
     if (!newCombo.name.trim()) return;
-    const c = { id: Date.now(), ...newCombo, stats: DEFAULT_STATS() };
+    const c = { id: Date.now(), ...newCombo, stats: DEFAULT_STATS(), history: [] };
     setCombos(prev => [...prev, c]);
     setActiveIdx(combos.length);
     setShowAdd(false);
-    setNewCombo({ name:'', blade:'', ratchet:'', bit:'' });
+    setNewCombo({ name:'', seriesType:'BX', blade:'', ratchet:'', bit:'', lockChip:'', mainBlade:'', assistBlade:'' });
     setTab('battle');
   };
 
@@ -642,7 +730,11 @@ export default function App() {
 
   const openEdit = (idx) => {
     const src = combos[idx];
-    setEditForm({ name: src.name, blade: src.blade || '', ratchet: src.ratchet || '', bit: src.bit || '' });
+    setEditForm({
+      name: src.name, seriesType: src.seriesType || 'BX',
+      blade: src.blade || '', ratchet: src.ratchet || '', bit: src.bit || '',
+      lockChip: src.lockChip || '', mainBlade: src.mainBlade || '', assistBlade: src.assistBlade || '',
+    });
     setEditComboIdx(idx);
   };
 
@@ -718,10 +810,10 @@ export default function App() {
     const copy = {
       id: Date.now(),
       name: src.name + suffix,
-      blade: src.blade,
-      ratchet: src.ratchet,
-      bit: src.bit,
-      stats: DEFAULT_STATS(),
+      seriesType: src.seriesType || 'BX',
+      blade: src.blade || '', ratchet: src.ratchet || '', bit: src.bit || '',
+      lockChip: src.lockChip || '', mainBlade: src.mainBlade || '', assistBlade: src.assistBlade || '',
+      stats: DEFAULT_STATS(), history: [],
     };
     setCombos(prev => [...prev, copy]);
     setActiveIdx(combos.length);
@@ -736,9 +828,10 @@ export default function App() {
       ns[finishKey] = { ...ns[finishKey] };
       if (result === 'win') { ns[finishKey].wins += 1; showNotif(t.notifWin, '#00FF64'); }
       else { ns[finishKey].losses += 1; showNotif(t.notifLoss, '#FF3C50'); }
-      return { ...c, stats: ns };
+      const entry = { date: Date.now(), finishKey, result, oppBlade: opponent.blade, oppRatchet: opponent.ratchet, oppBit: opponent.bit };
+      return { ...c, stats: ns, history: [...(c.history || []), entry] };
     }));
-  }, [activeIdx, t]);
+  }, [activeIdx, t, opponent]);
 
   const undo = () => {
     if (!undoStack.length) return;
@@ -750,7 +843,8 @@ export default function App() {
       ns[last.finishKey] = { ...ns[last.finishKey] };
       if (last.result === 'win') ns[last.finishKey].wins = Math.max(0, ns[last.finishKey].wins - 1);
       else ns[last.finishKey].losses = Math.max(0, ns[last.finishKey].losses - 1);
-      return { ...c, stats: ns };
+      const history = (c.history || []).slice(0, -1);
+      return { ...c, stats: ns, history };
     }));
     showNotif(t.notifUndo, '#FF9500');
   };
@@ -869,17 +963,33 @@ export default function App() {
           <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:12, color:'#38D9F5', textShadow:'0 0 8px #38D9F5', marginBottom:10, lineHeight:1.6 }}>
             {activeCombo.name}
           </div>
-          <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:14 }}>
-            {activeCombo.blade   && <span style={{ fontFamily:"'Press Start 2P',monospace", fontSize:8, padding:'5px 9px', background:'rgba(56,217,245,0.08)', border:'1px solid #38D9F533', color:'#38D9F5', borderRadius:2 }}>{activeCombo.blade}</span>}
-            {activeCombo.ratchet && <span style={{ fontFamily:"'Press Start 2P',monospace", fontSize:8, padding:'5px 9px', background:'rgba(255,179,64,0.08)',  border:'1px solid #FFB34033', color:'#FFB340', borderRadius:2 }}>{activeCombo.ratchet}</span>}
-            {activeCombo.bit     && <span style={{ fontFamily:"'Press Start 2P',monospace", fontSize:8, padding:'5px 9px', background:'rgba(201,127,255,0.08)', border:'1px solid #C97FFF33', color:'#C97FFF', borderRadius:2 }}>{activeCombo.bit}</span>}
-          </div>
+          <div style={{ marginBottom:14 }}><ComboParts combo={activeCombo} /></div>
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr 1fr', gap:8 }}>
             <StatChip label={t.winPct} value={activeStats.winRate}     unit="%" color="#00FF64" />
             <StatChip label={t.wins}   value={activeStats.totalWins}        color="#00FF64" />
             <StatChip label={t.loss}   value={activeStats.totalLosses}      color="#FF3C50" />
             <StatChip label={t.avgPt}  value={activeStats.avgWinScore}      color="#38D9F5" />
           </div>
+        </HudPanel>
+
+        {/* Opponent Combo */}
+        <HudPanel color="#FFB340" title={t.panelOpponent} style={{ marginBottom:14 }}>
+          <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:7, color:'rgba(255,255,255,0.35)', marginBottom:12 }}>{t.oppOptional}</div>
+          <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+            <PartSelect value={opponent.blade} onChange={v => setOpponent(p => ({ ...p, blade: v }))}
+              options={BLADES} placeholder={t.fieldBlade} accentColor="#38D9F5" />
+            <PartSelect value={opponent.ratchet} onChange={v => setOpponent(p => ({ ...p, ratchet: v }))}
+              options={RATCHETS} placeholder={t.fieldRatchet} accentColor="#FFB340" />
+            <PartSelect value={opponent.bit} onChange={v => setOpponent(p => ({ ...p, bit: v }))}
+              options={BITS} placeholder={t.fieldBit} accentColor="#C97FFF" />
+          </div>
+          {(opponent.blade || opponent.ratchet || opponent.bit) && (
+            <button onClick={() => setOpponent({ blade:'', ratchet:'', bit:'' })} style={{
+              marginTop:10, background:'transparent', border:'none',
+              color:'rgba(255,179,64,0.5)', fontFamily:"'Press Start 2P', monospace",
+              fontSize:7, cursor:'pointer', WebkitTapHighlightColor:'transparent',
+            }}>✕ {lang === 'zh' ? '清除' : 'CLEAR'}</button>
+          )}
         </HudPanel>
 
         <HudPanel color="#FF5C7A" title={t.panelRecord} style={{ marginBottom:14 }}>
@@ -899,11 +1009,7 @@ export default function App() {
           <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:12, color:'#38D9F5', textShadow:'0 0 8px #38D9F5', marginBottom:10, lineHeight:1.6 }}>
             {activeCombo.name}
           </div>
-          <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:14 }}>
-            {activeCombo.blade   && <span style={{ fontFamily:"'Press Start 2P',monospace", fontSize:8, padding:'5px 9px', background:'rgba(56,217,245,0.08)', border:'1px solid #38D9F533', color:'#38D9F5', borderRadius:2 }}>{activeCombo.blade}</span>}
-            {activeCombo.ratchet && <span style={{ fontFamily:"'Press Start 2P',monospace", fontSize:8, padding:'5px 9px', background:'rgba(255,179,64,0.08)',  border:'1px solid #FFB34033', color:'#FFB340', borderRadius:2 }}>{activeCombo.ratchet}</span>}
-            {activeCombo.bit     && <span style={{ fontFamily:"'Press Start 2P',monospace", fontSize:8, padding:'5px 9px', background:'rgba(201,127,255,0.08)', border:'1px solid #C97FFF33', color:'#C97FFF', borderRadius:2 }}>{activeCombo.bit}</span>}
-          </div>
+          <div style={{ marginBottom:14 }}><ComboParts combo={activeCombo} /></div>
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr 1fr', gap:8 }}>
             <StatChip label={t.winPct} value={activeStats.winRate}     unit="%" color="#00FF64" />
             <StatChip label={t.wins}   value={activeStats.totalWins}        color="#00FF64" />
@@ -1005,6 +1111,48 @@ export default function App() {
           );
         })()}
 
+        {/* ── Battle History ── */}
+        <HudPanel color="#38D9F5" title={t.panelHistory} style={{ marginBottom:14 }}>
+          {!(activeCombo.history && activeCombo.history.length) ? (
+            <div style={{ textAlign:'center', padding:'16px 0', fontFamily:"'Press Start 2P', monospace", fontSize:8, color:'rgba(255,255,255,0.25)', lineHeight:2 }}>
+              {t.historyEmpty}
+            </div>
+          ) : (
+            <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+              {[...activeCombo.history].reverse().slice(0, 20).map((h, i) => {
+                const ft = FINISH_TYPES.find(f => f.key === h.finishKey);
+                const isWin = h.result === 'win';
+                const d = new Date(h.date);
+                const dateStr = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+                return (
+                  <div key={i} style={{ padding:'8px 10px', borderRadius:4,
+                    background: isWin ? 'rgba(0,255,100,0.04)' : 'rgba(255,60,80,0.04)',
+                    border: `1px solid ${isWin ? 'rgba(0,255,100,0.15)' : 'rgba(255,60,80,0.15)'}` }}>
+                    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: (h.oppBlade || h.oppRatchet || h.oppBit) ? 6 : 0 }}>
+                      <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                        <span style={{ fontFamily:"'Press Start 2P', monospace", fontSize:9,
+                          color: isWin ? '#00FF64' : '#FF3C50',
+                          textShadow: isWin ? '0 0 6px #00FF64' : '0 0 6px #FF3C50' }}>
+                          {isWin ? (lang==='zh'?'勝':'WIN') : (lang==='zh'?'敗':'LOSS')}
+                        </span>
+                        {ft && <span style={{ fontFamily:"'Press Start 2P', monospace", fontSize:7, color:ft.color }}>{ft.icon} {t[ft.labelKey]}</span>}
+                      </div>
+                      <span style={{ fontFamily:"'Press Start 2P', monospace", fontSize:6, color:'rgba(255,255,255,0.25)' }}>{dateStr}</span>
+                    </div>
+                    {(h.oppBlade || h.oppRatchet || h.oppBit) && (
+                      <div style={{ display:'flex', gap:5, flexWrap:'wrap' }}>
+                        {h.oppBlade   && <span style={{ fontFamily:"'Press Start 2P', monospace", fontSize:6, padding:'3px 6px', background:'rgba(56,217,245,0.08)', border:'1px solid #38D9F522', color:'rgba(56,217,245,0.7)', borderRadius:2 }}>{h.oppBlade}</span>}
+                        {h.oppRatchet && <span style={{ fontFamily:"'Press Start 2P', monospace", fontSize:6, padding:'3px 6px', background:'rgba(255,179,64,0.08)',  border:'1px solid #FFB34022', color:'rgba(255,179,64,0.7)',  borderRadius:2 }}>{h.oppRatchet}</span>}
+                        {h.oppBit     && <span style={{ fontFamily:"'Press Start 2P', monospace", fontSize:6, padding:'3px 6px', background:'rgba(201,127,255,0.08)', border:'1px solid #C97FFF22', color:'rgba(201,127,255,0.7)', borderRadius:2 }}>{h.oppBit}</span>}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </HudPanel>
+
         {/* ── Glossary ── */}
         <HudPanel color="#C97FFF" title={t.panelGlossary} style={{ marginBottom:14 }}>
           {t.glossaryItems.map((item, i) => (
@@ -1024,12 +1172,79 @@ export default function App() {
     );
   };
 
-  const formFields = [
-    { key:'name',    label: t.fieldName,    placeholder: t.placeholderName,    required: true },
-    { key:'blade',   label: t.fieldBlade,   placeholder: t.placeholderBlade },
-    { key:'ratchet', label: t.fieldRatchet, placeholder: t.placeholderRatchet },
-    { key:'bit',     label: t.fieldBit,     placeholder: t.placeholderBit },
-  ];
+  // Reusable form body for Add/Edit modals
+  const renderComboFormBody = (form, setForm, accentColor) => {
+    const isCX = form.seriesType === 'CX';
+    const sel = (field, opts, color) => (
+      <PartSelect value={form[field]} onChange={v => setForm(p => ({ ...p, [field]: v }))}
+        options={opts} placeholder={t.selectPart} accentColor={color || accentColor} />
+    );
+    return (
+      <>
+        {/* Name */}
+        <div style={{ marginBottom:14 }}>
+          <label style={{ fontFamily:"'Press Start 2P', monospace", fontSize:9, color:'rgba(255,255,255,0.4)', display:'block', marginBottom:8 }}>
+            {t.fieldName}<span style={{ color:'#FF3C50' }}> *</span>
+          </label>
+          <input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
+            placeholder={t.placeholderName}
+            style={{ width:'100%', padding:'11px 12px', borderRadius:4,
+              background:'rgba(255,255,255,0.03)', border:`1px solid ${accentColor}22`,
+              color:'#F1F5F9', fontFamily:"'Press Start 2P', monospace", fontSize:9,
+              outline:'none', transition:'border-color 0.2s' }}
+            onFocus={e => e.currentTarget.style.borderColor = accentColor}
+            onBlur={e => e.currentTarget.style.borderColor = `${accentColor}22`} />
+        </div>
+        {/* Series */}
+        <div style={{ marginBottom:14 }}>
+          <label style={{ fontFamily:"'Press Start 2P', monospace", fontSize:9, color:'rgba(255,255,255,0.4)', display:'block', marginBottom:8 }}>{t.fieldSeries}</label>
+          <div style={{ display:'flex', gap:6 }}>
+            {[['BX', t.seriesBX, '#38D9F5'], ['UX', t.seriesUX, '#FFB340'], ['CX', t.seriesCX, '#FF5C7A']].map(([val, label, color]) => (
+              <button key={val} onClick={() => setForm(p => ({ ...p, seriesType: val, blade:'', lockChip:'', mainBlade:'', assistBlade:'' }))}
+                style={{ flex:1, padding:'9px 4px', borderRadius:4, cursor:'pointer',
+                  border: form.seriesType === val ? `1px solid ${color}` : '1px solid rgba(255,255,255,0.1)',
+                  background: form.seriesType === val ? `${color}18` : 'rgba(255,255,255,0.02)',
+                  color: form.seriesType === val ? color : 'rgba(255,255,255,0.35)',
+                  fontFamily:"'Press Start 2P', monospace", fontSize:7, WebkitTapHighlightColor:'transparent',
+                }}>{label}</button>
+            ))}
+          </div>
+        </div>
+        {/* Blade / CX parts */}
+        {isCX ? (
+          <>
+            <div style={{ marginBottom:10 }}>
+              <label style={{ fontFamily:"'Press Start 2P', monospace", fontSize:9, color:'rgba(255,255,255,0.4)', display:'block', marginBottom:8 }}>{t.fieldLock}</label>
+              {sel('lockChip', CX_LOCK_CHIPS, '#FF5C7A')}
+            </div>
+            <div style={{ marginBottom:10 }}>
+              <label style={{ fontFamily:"'Press Start 2P', monospace", fontSize:9, color:'rgba(255,255,255,0.4)', display:'block', marginBottom:8 }}>{t.fieldMainBlade}</label>
+              {sel('mainBlade', CX_MAIN_BLADES, '#38D9F5')}
+            </div>
+            <div style={{ marginBottom:14 }}>
+              <label style={{ fontFamily:"'Press Start 2P', monospace", fontSize:9, color:'rgba(255,255,255,0.4)', display:'block', marginBottom:8 }}>{t.fieldAssistBlade}</label>
+              {sel('assistBlade', CX_ASSIST_BLADES, '#00FF64')}
+            </div>
+          </>
+        ) : (
+          <div style={{ marginBottom:14 }}>
+            <label style={{ fontFamily:"'Press Start 2P', monospace", fontSize:9, color:'rgba(255,255,255,0.4)', display:'block', marginBottom:8 }}>{t.fieldBlade}</label>
+            {sel('blade', BLADES, accentColor)}
+          </div>
+        )}
+        {/* Ratchet */}
+        <div style={{ marginBottom:10 }}>
+          <label style={{ fontFamily:"'Press Start 2P', monospace", fontSize:9, color:'rgba(255,255,255,0.4)', display:'block', marginBottom:8 }}>{t.fieldRatchet}</label>
+          {sel('ratchet', RATCHETS, '#FFB340')}
+        </div>
+        {/* Bit */}
+        <div style={{ marginBottom:4 }}>
+          <label style={{ fontFamily:"'Press Start 2P', monospace", fontSize:9, color:'rgba(255,255,255,0.4)', display:'block', marginBottom:8 }}>{t.fieldBit}</label>
+          {sel('bit', BITS, '#C97FFF')}
+        </div>
+      </>
+    );
+  };
 
   return (
     <LangCtx.Provider value={t}>
@@ -1234,38 +1449,19 @@ export default function App() {
               <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:12, color:'#FFB340', textShadow:'0 0 8px #FFB340', marginBottom:6 }}>{t.modalEditTitle}</div>
               <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:8, color:'rgba(255,255,255,0.3)', marginBottom:24, letterSpacing:1 }}>{t.modalSub}</div>
 
-              {[
-                { key:'name',    label: t.fieldName,    placeholder: t.placeholderName,    required: true },
-                { key:'blade',   label: t.fieldBlade,   placeholder: t.placeholderBlade },
-                { key:'ratchet', label: t.fieldRatchet, placeholder: t.placeholderRatchet },
-                { key:'bit',     label: t.fieldBit,     placeholder: t.placeholderBit },
-              ].map(field => (
-                <div key={field.key} style={{ marginBottom:16 }}>
-                  <label style={{ fontFamily:"'Press Start 2P', monospace", fontSize:9, color:'rgba(255,255,255,0.4)', display:'block', marginBottom:8, letterSpacing:1 }}>
-                    {field.label}{field.required && <span style={{ color:'#FF3C50' }}> *</span>}
-                  </label>
-                  <input value={editForm[field.key]}
-                    onChange={e => setEditForm(prev => ({ ...prev, [field.key]: e.target.value }))}
-                    placeholder={field.placeholder}
-                    style={{ width:'100%', padding:'13px 14px', borderRadius:4,
-                      background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,179,64,0.2)',
-                      color:'#F1F5F9', fontFamily:"'Press Start 2P', monospace", fontSize:10,
-                      outline:'none', transition:'border-color 0.2s' }}
-                    onFocus={e => e.currentTarget.style.borderColor = '#FFB340'}
-                    onBlur={e => e.currentTarget.style.borderColor = 'rgba(255,179,64,0.2)'}
-                  />
-                </div>
-              ))}
+              <div style={{ maxHeight:'55vh', overflowY:'auto', paddingRight:2 }}>
+                {renderComboFormBody(editForm, setEditForm, '#FFB340')}
+              </div>
 
-              <div style={{ display:'flex', gap:10, marginTop:24 }}>
+              <div style={{ display:'flex', gap:10, marginTop:20 }}>
                 <button onClick={() => setEditComboIdx(null)} style={{
-                  flex:1, padding:'15px', borderRadius:4, border:'1px solid rgba(255,255,255,0.08)',
+                  flex:1, padding:'13px', borderRadius:4, border:'1px solid rgba(255,255,255,0.08)',
                   background:'transparent', color:'rgba(255,255,255,0.4)',
                   fontFamily:"'Press Start 2P', monospace", fontSize:9, cursor:'pointer',
                   WebkitTapHighlightColor:'transparent',
                 }}>{t.btnCancel}</button>
                 <button onClick={saveEdit} disabled={!editForm.name.trim()} style={{
-                  flex:2, padding:'15px', borderRadius:4, border:'none',
+                  flex:2, padding:'13px', borderRadius:4, border:'none',
                   background: editForm.name.trim() ? 'linear-gradient(135deg, #FFB340, #FF5C7A)' : 'rgba(255,255,255,0.05)',
                   color: editForm.name.trim() ? '#000' : 'rgba(255,255,255,0.2)',
                   fontFamily:"'Press Start 2P', monospace", fontSize:9, fontWeight:700,
@@ -1289,33 +1485,19 @@ export default function App() {
               <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:12, color:'#38D9F5', textShadow:'0 0 8px #38D9F5', marginBottom:6 }}>{t.modalTitle}</div>
               <div style={{ fontFamily:"'Press Start 2P', monospace", fontSize:8, color:'rgba(255,255,255,0.3)', marginBottom:24, letterSpacing:1 }}>{t.modalSub}</div>
 
-              {formFields.map(field => (
-                <div key={field.key} style={{ marginBottom:16 }}>
-                  <label style={{ fontFamily:"'Press Start 2P', monospace", fontSize:9, color:'rgba(255,255,255,0.4)', display:'block', marginBottom:8, letterSpacing:1 }}>
-                    {field.label}{field.required && <span style={{ color:'#FF3C50' }}> *</span>}
-                  </label>
-                  <input value={newCombo[field.key]}
-                    onChange={e => setNewCombo(prev => ({ ...prev, [field.key]: e.target.value }))}
-                    placeholder={field.placeholder}
-                    style={{ width:'100%', padding:'13px 14px', borderRadius:4,
-                      background:'rgba(255,255,255,0.03)', border:'1px solid rgba(56,217,245,0.15)',
-                      color:'#F1F5F9', fontFamily:"'Press Start 2P', monospace", fontSize:10,
-                      outline:'none', transition:'border-color 0.2s' }}
-                    onFocus={e => e.currentTarget.style.borderColor = '#38D9F5'}
-                    onBlur={e => e.currentTarget.style.borderColor = 'rgba(56,217,245,0.15)'}
-                  />
-                </div>
-              ))}
+              <div style={{ maxHeight:'55vh', overflowY:'auto', paddingRight:2 }}>
+                {renderComboFormBody(newCombo, setNewCombo, '#38D9F5')}
+              </div>
 
-              <div style={{ display:'flex', gap:10, marginTop:24 }}>
+              <div style={{ display:'flex', gap:10, marginTop:20 }}>
                 <button onClick={() => setShowAdd(false)} style={{
-                  flex:1, padding:'15px', borderRadius:4, border:'1px solid rgba(255,255,255,0.08)',
+                  flex:1, padding:'13px', borderRadius:4, border:'1px solid rgba(255,255,255,0.08)',
                   background:'transparent', color:'rgba(255,255,255,0.4)',
                   fontFamily:"'Press Start 2P', monospace", fontSize:9, cursor:'pointer',
                   WebkitTapHighlightColor:'transparent',
                 }}>{t.btnCancel}</button>
                 <button onClick={addCombo} disabled={!newCombo.name.trim()} style={{
-                  flex:2, padding:'15px', borderRadius:4, border:'none',
+                  flex:2, padding:'13px', borderRadius:4, border:'none',
                   background: newCombo.name.trim() ? 'linear-gradient(135deg, #38D9F5, #C97FFF)' : 'rgba(255,255,255,0.05)',
                   color: newCombo.name.trim() ? '#000' : 'rgba(255,255,255,0.2)',
                   fontFamily:"'Press Start 2P', monospace", fontSize:9, fontWeight:700,
